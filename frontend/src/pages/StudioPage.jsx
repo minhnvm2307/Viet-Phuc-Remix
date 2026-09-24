@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 // Bảng màu sắc trang phục cung đình & dân gian
 const COLOR_SWATCHES = [
@@ -69,8 +70,11 @@ const getDynastyForCostume = (costume) => {
 export default function StudioPage({
   initialCostume,
   initialAccessory = null,
-  onBackToCatalog
+  onBackToCatalog,
+  onRequireAuth
 }) {
+  const { isAuthenticated, token } = useAuth();
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [costumes, setCostumes] = useState([]);
   const [selectedCostume, setSelectedCostume] = useState(initialCostume || null);
   const [selectedColor, setSelectedColor] = useState(COLOR_SWATCHES[0]);
@@ -220,13 +224,54 @@ export default function StudioPage({
   // Xử lý submit prompt tạo phối đồ AI
   const handlePromptSubmit = (e) => {
     e?.preventDefault();
-    if (!mixPrompt.trim() && !hasGeneratedOnce) {
-      setMixPrompt('Phối trang phục cổ phục cùng phong cách hiện đại');
+
+    // 1. Kiểm tra đăng nhập (chỉ người dùng có tài khoản mới được tạo ảnh và lưu lookbook)
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return;
+    }
+
+    const currentPrompt = mixPrompt.trim() || 'Phối trang phục cổ phục cùng phong cách hiện đại';
+    if (!mixPrompt.trim()) {
+      setMixPrompt(currentPrompt);
     }
     setIsGenerating(true);
+    setSaveSuccessMsg('');
+
     setTimeout(() => {
       setIsGenerating(false);
       setHasGeneratedOnce(true);
+
+      // Tự động lưu bản phối vào Lookbook cá nhân của user trên backend
+      const outputs = getAiOutputs();
+      const chosenImage = outputs[activeProposalIndex] || outputs[0];
+
+      if (token) {
+        fetch('/api/lookbooks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            costume_id: selectedCostume?.id || 'heritage-mix',
+            costume_name: selectedCostume?.name || 'Cổ Phục Remix',
+            accessories_json: JSON.stringify(
+              selectedAccList.map((a) => ({ id: a.id, name: a.name, category: a.category }))
+            ),
+            prompt: currentPrompt,
+            result_image_url: chosenImage,
+            user_photo_url: userPhoto || null
+          })
+        })
+          .then((res) => {
+            if (res.ok) {
+              setSaveSuccessMsg('Đã tự động lưu bản phối vào Tủ đồ cá nhân của bạn!');
+              setTimeout(() => setSaveSuccessMsg(''), 4000);
+            }
+          })
+          .catch((err) => console.error('Lỗi lưu lookbook:', err));
+      }
     }, 1800);
   };
 
@@ -531,6 +576,13 @@ export default function StudioPage({
                 {isGenerating ? 'ĐANG TẠO...' : 'TẠO ẢNH'}
               </button>
             </form>
+
+            {saveSuccessMsg && (
+              <div className="save-lookbook-toast">
+                <span className="toast-dot">●</span>
+                <span>{saveSuccessMsg}</span>
+              </div>
+            )}
           </div>
 
           {/* KHỐI 3: ĐÚNG 2 Ô OUTPUT (CHỈ XUẤT HIỆN KHI SUBMIT, KHÔNG CÓ TIÊU ĐỀ / MÔ TẢ TRÊN ẢNH) */}

@@ -1,36 +1,73 @@
 import React, { useState } from 'react';
 import Header from './components/Header';
+import LandingPage from './pages/LandingPage';
 import HeritageCatalog from './pages/HeritageCatalog';
 import StudioPage from './pages/StudioPage';
-import { Compass, Sparkles, Heart, ShieldCheck, ExternalLink } from 'lucide-react';
+import ProfilePage from './pages/ProfilePage';
+import AuthModal from './components/AuthModal';
+import { useAuth } from './context/AuthContext';
+import { ShieldCheck } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('catalog');
+  const { isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState('landing');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudioCostume, setSelectedStudioCostume] = useState(null);
   const [selectedStudioAccessory, setSelectedStudioAccessory] = useState(null);
   const [studioInitialMode, setStudioInitialMode] = useState('gallery');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
+  // Xử lý chuyển từ Catalog sang Studio
   const handleSelectForStudio = (costume, mode = 'gallery', accessory = null) => {
     setSelectedStudioCostume(costume);
     setSelectedStudioAccessory(accessory);
     setStudioInitialMode(mode);
-    setActiveTab('studio');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+    } else {
+      setActiveTab('studio');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Mở Studio từ nút điều hướng chung
+  const handleOpenStudio = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+    } else {
+      setActiveTab('studio');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Sticky Header */}
+      {/* Sticky Header Tinh Gọn */}
       <Header
-        onSearch={setSearchQuery}
-        searchQuery={searchQuery}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenStudio={handleOpenStudio}
       />
 
       {/* Main Content Area */}
       <main style={{ flex: 1 }}>
+        {/* 1. TRANG LANDING GIỚI THIỆU */}
+        {activeTab === 'landing' && (
+          <LandingPage
+            onExploreCatalog={() => {
+              setActiveTab('catalog');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onStartStudio={handleOpenStudio}
+          />
+        )}
+
+        {/* 2. TRANG CHÍNH - KHÁM PHÁ DI SẢN */}
         {activeTab === 'catalog' && (
           <HeritageCatalog
             searchQuery={searchQuery}
@@ -38,11 +75,13 @@ export default function App() {
           />
         )}
 
+        {/* 3. TRANG MIX STUDIO AI */}
         {activeTab === 'studio' && (
           <StudioPage
             initialCostume={selectedStudioCostume}
             initialAccessory={selectedStudioAccessory}
             initialMode={studioInitialMode}
+            onRequireAuth={() => setIsAuthModalOpen(true)}
             onBackToCatalog={() => {
               setActiveTab('catalog');
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -50,50 +89,15 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'community' && (
-          <div className="container" style={{ padding: '80px 24px', textAlign: 'center' }}>
-            <div style={{
-              maxWidth: '600px',
-              margin: '0 auto',
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '40px'
-            }}>
-              <h2 style={{ fontSize: '28px', marginBottom: '12px' }}>
-                Bảng Bình Chọn Cộng Đồng (Trang 3)
-              </h2>
-              <p style={{ color: 'var(--color-text-muted)', marginBottom: '24px', lineHeight: '1.6' }}>
-                Không gian chia sẻ lookbook, bảng vàng sáng tạo và bình chọn các bản phối ấn tượng nhất tuần.
-              </p>
-              <button onClick={() => setActiveTab('catalog')} className="btn btn-primary">
-                Quay lại Khám Phá Di Sản
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'trend' && (
-          <div className="container" style={{ padding: '80px 24px', textAlign: 'center' }}>
-            <div style={{
-              maxWidth: '600px',
-              margin: '0 auto',
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '40px'
-            }}>
-              <h2 style={{ fontSize: '28px', marginBottom: '12px' }}>
-                Chuyển Hóa Xu Hướng TikTok / Reels (Tính Năng 4)
-              </h2>
-              <p style={{ color: 'var(--color-text-muted)', marginBottom: '24px', lineHeight: '1.6' }}>
-                Trích xuất phong cách từ video ngắn mạng xã hội và ánh xạ tương ứng sang trang phục truyền thống Việt Nam.
-              </p>
-              <button onClick={() => setActiveTab('catalog')} className="btn btn-primary">
-                Quay lại Khám Phá Di Sản
-              </button>
-            </div>
-          </div>
+        {/* 4. TRANG CÁ NHÂN & TỦ ĐỒ LOOKBOOK */}
+        {activeTab === 'profile' && (
+          <ProfilePage
+            onNavigateToStudio={handleOpenStudio}
+            onNavigateToCatalog={() => {
+              setActiveTab('catalog');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         )}
       </main>
 
@@ -158,18 +162,27 @@ export default function App() {
             paddingTop: '24px',
             borderTop: '1px solid var(--color-border)',
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
+            alignItems: 'center',
             fontSize: '12px',
-            color: 'var(--color-text-subtle)',
-            flexWrap: 'wrap',
-            gap: '12px'
+            color: 'var(--color-text-muted)'
           }}>
-            <span>© 2026 Việt Phục Remix. Thiết kế theo phong cách Modern Editorial Heritage.</span>
-            <span>Bảo tồn di sản số • Khơi nguồn cảm hứng sáng tạo</span>
+            <span>© 2026 Việt Phục Remix. Bảo lưu mọi quyền di sản số.</span>
+            <span>Hào Khí Đông A — Bản Sắc Muôn Đời</span>
           </div>
         </div>
       </footer>
+
+      {/* Hộp thoại Đăng Nhập / Đăng Ký Popup */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => {
+          setIsAuthModalOpen(false);
+          setActiveTab('studio');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }
