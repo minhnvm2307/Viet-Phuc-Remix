@@ -7,7 +7,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
-from app.routers import heritage
+from app.core.database import init_db
+from app.routers import heritage, auth
+
+# Khởi tạo bảng cơ sở dữ liệu
+init_db()
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -30,6 +34,7 @@ if settings.STATIC_DIR.exists():
 
 # Include Routers
 app.include_router(heritage.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 
 
 @app.get("/health")
