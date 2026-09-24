@@ -1,16 +1,13 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-export default function Header({ onSearch, searchQuery, activeTab, setActiveTab }) {
-  const scrollTo = (hash) => {
-    setActiveTab('catalog');
-    setTimeout(() => {
-      const el = document.querySelector(hash);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 50);
-  };
+export default function Header({
+  activeTab,
+  setActiveTab,
+  onOpenAuth,
+  onOpenStudio
+}) {
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <header className="editorial-header">
@@ -18,54 +15,58 @@ export default function Header({ onSearch, searchQuery, activeTab, setActiveTab 
       <div
         className="brand-title"
         style={{ cursor: 'pointer' }}
-        onClick={() => scrollTo('#gallery')}
+        onClick={() => setActiveTab('landing')}
+        title="Về Trang Giới Thiệu"
       >
         <div className="brand-seal">VP</div>
         <span>Việt Phục Remix</span>
       </div>
 
       {/* Navigation */}
-      <nav style={{ display: 'flex', alignItems: 'center' }}>
-        <button onClick={() => scrollTo('#gallery')}>Bộ sưu tập</button>
-        <button onClick={() => scrollTo('#dynasties')}>Dòng thời gian</button>
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button
-          onClick={() => setActiveTab('studio')}
-          style={{
-            color: activeTab === 'studio' ? 'var(--dynasty-color)' : 'var(--text-main)',
-            fontWeight: activeTab === 'studio' ? '700' : '600'
+          type="button"
+          onClick={() => setActiveTab('catalog')}
+          className={`header-nav-btn ${activeTab === 'catalog' ? 'active' : ''}`}
+        >
+          Khám Phá Di Sản
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (onOpenStudio) {
+              onOpenStudio();
+            } else {
+              setActiveTab('studio');
+            }
           }}
+          className={`header-nav-btn ${activeTab === 'studio' ? 'active' : ''}`}
         >
           Mix Studio AI
         </button>
 
-        {/* Search Input Box */}
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          backgroundColor: '#FFFFFF',
-          border: '1px solid var(--border-line)',
-          borderRadius: 'var(--radius-full)',
-          padding: '6px 14px',
-          marginLeft: '24px'
-        }}>
-          <Search size={13} color="var(--text-muted)" />
-          <input
-            type="text"
-            placeholder="Tìm theo kiểu áo..."
-            value={searchQuery}
-            onChange={(e) => onSearch(e.target.value)}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              outline: 'none',
-              fontSize: '12px',
-              fontFamily: 'var(--font-sans)',
-              width: '160px',
-              color: 'var(--text-main)'
-            }}
-          />
-        </div>
+        {/* User Account / Profile / Login Button */}
+        {isAuthenticated ? (
+          <button
+            type="button"
+            onClick={() => setActiveTab('profile')}
+            className={`header-nav-btn profile-btn ${activeTab === 'profile' ? 'active' : ''}`}
+            title="Xem hồ sơ và các Lookbook đã lưu"
+          >
+            <span className="profile-indicator">●</span>
+            <span>Trang Cá Nhân ({user?.full_name?.split(' ')?.[0] || user?.username})</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onOpenAuth}
+            className="header-login-btn"
+            title="Đăng nhập tài khoản"
+          >
+            ĐĂNG NHẬP
+          </button>
+        )}
       </nav>
     </header>
   );

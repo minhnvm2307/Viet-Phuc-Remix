@@ -110,20 +110,64 @@ nav a,
 nav button {
   text-decoration: none;
   color: var(--text-main);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-left: 28px;
   background: none;
   border: none;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.2s ease;
+  padding: 6px 12px;
+  border-radius: 8px;
 }
 
-nav a:hover,
 nav button:hover {
   color: var(--dynasty-color);
+  background-color: rgba(140, 45, 25, 0.04);
+}
+
+nav button.active {
+  color: var(--dynasty-color);
+  font-weight: 700;
+}
+
+.header-login-btn {
+  background: #8C2D19 !important;
+  color: #FFFFFF !important;
+  padding: 7px 16px !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.08em !important;
+  box-shadow: 0 3px 10px rgba(140, 45, 25, 0.2);
+  transition: all 0.2s ease !important;
+}
+
+.header-login-btn:hover {
+  background: #A6361E !important;
+  transform: translateY(-1px);
+}
+
+.header-nav-btn.profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #F4EFEB;
+  border: 1px solid #E2DACF;
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: #38332D;
+}
+
+.header-nav-btn.profile-btn:hover {
+  border-color: #8C2D19;
+  color: #8C2D19;
+}
+
+.profile-indicator {
+  color: #2E7D32;
+  font-size: 10px;
 }
 
 /* 3. HERO GALLERY KHUNG VÒM (ARCH HERO CAROUSEL) */
