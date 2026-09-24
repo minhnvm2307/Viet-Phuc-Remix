@@ -1,0 +1,16 @@
+[project]
+name = "viet-phuc-remix"
+version = "0.1.0"
+description = "Phối trang phục truyền thống Việt Nam theo phong cách Gen Z"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "google-genai",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-dotenv",
+    "python-multipart",
+    "pillow",
+    "pydantic",
+    "requests",
+]
