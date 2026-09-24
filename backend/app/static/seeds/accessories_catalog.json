@@ -1,327 +1,364 @@
 {
   "metadata": {
-    "title": "Kho Phụ Kiện & Cổ Vật Di Sản Việt Nam (Headwear, Jewelry & Hairstyles)",
-    "version": "1.0.0",
+    "title": "Kho Phụ Kiện & Cổ Vật Di Sản Việt Nam (Headwear, Hairstyles & Jewelry)",
+    "version": "2.0.0",
     "curator": "Việt Phục Remix Cultural Heritage Archive",
-    "total_items": 18
+    "total_items": 26
   },
   "categories": [
     {
-      "id": "all",
-      "name": "Tất Cả Phụ Kiện"
-    },
-    {
       "id": "headwear",
-      "name": "👑 Mũ & Nón Di Sản"
+      "name": "Mũ & Nón"
     },
     {
       "id": "hairstyles",
-      "name": "💇‍♀️ Kiểu Tóc & Khăn Vấn"
+      "name": "Kiểu Tóc & Khăn Vấn"
     },
     {
       "id": "jewelry",
-      "name": "💎 Trang Sức & Cổ Vật"
-    },
-    {
-      "id": "footwear",
-      "name": "🥿 Hài & Guốc Cổ Truyền"
+      "name": "Trang Sức"
     }
   ],
   "dynasties": [
-    {
-      "id": "ALL",
-      "name": "Tất Cả Triều Đại"
-    },
-    {
-      "id": "LY_TRAN",
-      "name": "Thời Lý - Trần (1009 - 1400)"
-    },
-    {
-      "id": "LE_MAC",
-      "name": "Thời Hậu Lê (1428 - 1788)"
-    },
-    {
-      "id": "NGUYEN_DYNASTY",
-      "name": "Triều Nguyễn (1802 - 1945)"
-    },
-    {
-      "id": "DAN_GIAN",
-      "name": "Dân Gian Kinh Bắc & Đồng Bằng"
-    }
+    { "id": "ALL", "name": "Tất Cả Triều Đại" },
+    { "id": "DINH", "name": "Thời Đinh (968 - 980)" },
+    { "id": "NGO", "name": "Thời Ngô (939 - 965)" },
+    { "id": "LY_TRAN", "name": "Thời Lý - Trần (1009 - 1400)" },
+    { "id": "LE_MAC", "name": "Thời Hậu Lê (1428 - 1788)" },
+    { "id": "NGUYEN_DYNASTY", "name": "Triều Nguyễn (1802 - 1945)" },
+    { "id": "DAN_GIAN", "name": "Dân Gian Bắc Bộ & Đồng Bằng" },
+    { "id": "NAM_BO", "name": "Dân Gian Nam Bộ" }
   ],
   "items": [
     {
-      "id": "non-ba-tam-quai-thao",
-      "name": "Nón Ba Tầm (Nón Quai Thao)",
+      "id": "tran-non",
+      "name": "Nón Thời Trần",
       "category": "headwear",
-      "category_name": "Mũ & Nón Di Sản",
-      "dynasty_code": "DAN_GIAN",
-      "dynasty_name": "Dân Gian Kinh Bắc & Hậu Lê",
-      "era_period": "Thế kỷ XVII - Đầu Thế kỷ XX",
-      "image": "/static/seeds/cutouts/headwear/non-ba-tam-quai-thao-lon.png",
-      "description": "Nón tròn dẹt vành rộng đan mây tre guột tinh tế, lòng nón có khùa tròn đội vừa đầu, hai bên buông hai dải quai thao bằng sợi tơ tằm óng ả rủ xuống ngực.",
-      "cultural_guardrail": "Cấu trúc nón phẳng tròn bản lớn đặc trưng thuần Việt của vùng Kinh Bắc. Tuyệt đối không nhầm lẫn với nón lá chóp nhọn hay nón tơi thôn dã.",
-      "remix_tip": "Phối cùng áo blazer hiện đại hoặc đầm lụa trơn khi chụp lookbook ngoài trời, tạo hiệu ứng tương phản thị giác độc đáo."
-    },
-    {
-      "id": "khan-vanh-day-hoang-cung",
-      "name": "Khăn Vành Dây Hoàng Cung",
-      "category": "headwear",
-      "category_name": "Mũ & Nón Di Sản",
-      "dynasty_code": "NGUYEN_DYNASTY",
-      "dynasty_name": "Triều Nguyễn",
-      "era_period": "1802 - 1945",
-      "image": "/static/seeds/cutouts/hairstyles/khan-vanh-vang-lon.png",
-      "description": "Dải lụa hoặc gấm vàng quấn chồng lớp quanh đầu tạo thành vành mũ tròn thanh nhã, tôn lên vầng trán thanh tú của bậc hoàng hậu, công chúa và mệnh phụ cung đình.",
-      "cultural_guardrail": "Màu vàng chính sắc chỉ dành riêng cho Hoàng Thái Hậu và Hoàng Hậu. Công chúa và mệnh phụ dùng màu đỏ điều, tím huế hoặc lam bích.",
-      "remix_tip": "Ứng dụng trong trang phục cưới hiện đại phối cùng áo Nhật Bình hoặc áo dài lụa tơ tằm tối giản."
-    },
-    {
-      "id": "man-cung-dinh-theu-phuong",
-      "name": "Mấn Cung Đình Đính Kim Hoàn",
-      "category": "headwear",
-      "category_name": "Mũ & Nón Di Sản",
-      "dynasty_code": "NGUYEN_DYNASTY",
-      "dynasty_name": "Triều Nguyễn",
-      "era_period": "Thế kỷ XIX - XX",
-      "image": "/static/seeds/cutouts/hairstyles/mao-phuong-hoang-hau.png",
-      "description": "Mấn nhung cao cấp đính đồ án chim phượng ngậm châu, hoa cúc vạn thọ bằng vàng ròng và đá quý của hoàng gia.",
-      "cultural_guardrail": "Hoa văn phượng hoàng triều Nguyễn đuôi dài xòe 5 hoặc 9 nhánh mềm mại, thể hiện tính uy nghi chuẩn mực phong kiến.",
-      "remix_tip": "Điểm nhấn quyền lực khi kết hợp với áo dài cách tân đơn sắc không họa tiết."
-    },
-    {
-      "id": "non-bai-tho-hue",
-      "name": "Nón Lá Bài Thơ Xứ Huế",
-      "category": "headwear",
-      "category_name": "Mũ & Nón Di Sản",
-      "dynasty_code": "NGUYEN_DYNASTY",
-      "dynasty_name": "Triều Nguyễn & Cố Đô Huế",
-      "era_period": "Cuối Thế kỷ XIX - Nay",
-      "image": "/static/seeds/cutouts/headwear/nguyen-non.png",
-      "description": "Nón chóp nhọn 16 vành tre chuốt thanh mảnh, đan xen giữa hai lớp lá gồi trắng ngà là những câu thơ chữ Nôm hoặc hình chùa Thiên Mụ chỉ hiện rõ khi soi dưới ánh nắng.",
-      "cultural_guardrail": "Phom nón chóp thanh thoát, quai lụa mềm mại màu tím hoặc cánh sen, phản ánh nét dịu dàng kín đáo của người con gái sông Hương.",
-      "remix_tip": "Phụ kiện dạo phố mùa hè phối cùng áo bà ba lụa hiện đại hoặc áo sơ mi đũi dáng rộng."
-    },
-    {
-      "id": "mu-binh-thien-tran",
-      "name": "Mũ Bình Thiên Triều Trần",
-      "category": "headwear",
-      "category_name": "Mũ & Nón Di Sản",
+      "category_name": "Mũ & Nón",
       "dynasty_code": "LY_TRAN",
       "dynasty_name": "Thời Lý - Trần",
       "era_period": "1225 - 1400",
-      "image": "/static/seeds/cutouts/headwear/tran-non.png",
-      "description": "Mũ miện đại triều của thiên tử thời Trần, bản đỉnh vuông phẳng tượng trưng cho Trời và Đất, hai bên buông dải thao đỏ uy nghiêm.",
-      "cultural_guardrail": "Tuyệt đối giữ đúng kết cấu phẳng thanh gọn thời Trần, không thêm thắt chuỗi ngọc rườm rà kiểu triều đình phương Bắc.",
-      "remix_tip": "Trang phục biểu diễn sân khấu lịch sử và nghệ thuật concept art cung đình."
+      "image": "/static/seeds/cutouts/headwear/tran-non.png"
     },
     {
-      "id": "mu-xung-thien-le",
-      "name": "Mũ Xung Thiên Triều Lê Sơ",
+      "id": "le-non",
+      "name": "Nón Thời Hậu Lê",
       "category": "headwear",
-      "category_name": "Mũ & Nón Di Sản",
+      "category_name": "Mũ & Nón",
       "dynasty_code": "LE_MAC",
       "dynasty_name": "Thời Hậu Lê",
       "era_period": "1428 - 1788",
-      "image": "/static/seeds/cutouts/headwear/le-non.png",
-      "description": "Mũ đại triều của hoàng đế thời Lê Thánh Tông, hai cánh khí xung thiên vút thẳng lên trời thể hiện sự thông đạt đạo trời đất.",
-      "cultural_guardrail": "Cánh mũ hướng thẳng đứng lên trên, khác với mũ cánh chuồn ngang của quan viên.",
-      "remix_tip": "Tham chiếu nghiên cứu lịch sử và mỹ thuật phục dựng di sản Đại Việt."
+      "image": "/static/seeds/cutouts/headwear/le-non.png"
     },
     {
-      "id": "toc-van-tran-banh-trang",
-      "name": "Tóc Vấn Trần (Bánh Tráng)",
+      "id": "nguyen-non",
+      "name": "Nón Thời Nguyễn",
+      "category": "headwear",
+      "category_name": "Mũ & Nón",
+      "dynasty_code": "NGUYEN_DYNASTY",
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "1802 - 1945",
+      "image": "/static/seeds/cutouts/headwear/nguyen-non.png"
+    },
+    {
+      "id": "non-nam-trieu-nguyen",
+      "name": "Nón Nam Triều Nguyễn",
+      "category": "headwear",
+      "category_name": "Mũ & Nón",
+      "dynasty_code": "NGUYEN_DYNASTY",
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "Thế kỷ XIX - XX",
+      "image": "/static/seeds/cutouts/headwear/non-nam-trieu-nguyen.png"
+    },
+    {
+      "id": "dinh-non",
+      "name": "Nón Thời Đinh",
+      "category": "headwear",
+      "category_name": "Mũ & Nón",
+      "dynasty_code": "DINH",
+      "dynasty_name": "Thời Đinh",
+      "era_period": "968 - 980",
+      "image": "/static/seeds/cutouts/headwear/dinh-non.png"
+    },
+    {
+      "id": "ngo-non",
+      "name": "Nón Thời Ngô",
+      "category": "headwear",
+      "category_name": "Mũ & Nón",
+      "dynasty_code": "NGO",
+      "dynasty_name": "Thời Ngô",
+      "era_period": "939 - 965",
+      "image": "/static/seeds/cutouts/headwear/ngo-non.png"
+    },
+    {
+      "id": "non-ba-tam-quai-thao",
+      "name": "Nón Ba Tầm Quai Thao",
+      "category": "headwear",
+      "category_name": "Mũ & Nón",
+      "dynasty_code": "DAN_GIAN",
+      "dynasty_name": "Dân Gian Bắc Bộ",
+      "era_period": "Cổ truyền đến Thế kỷ XX",
+      "image": "/static/seeds/cutouts/headwear/non-ba-tam-quai-thao-lon.png"
+    },
+    {
+      "id": "non-quai-thao-long",
+      "name": "Nón Quai Thao Thắt Lông",
+      "category": "headwear",
+      "category_name": "Mũ & Nón",
+      "dynasty_code": "DAN_GIAN",
+      "dynasty_name": "Dân Gian Bắc Bộ",
+      "era_period": "Cổ truyền",
+      "image": "/static/seeds/cutouts/headwear/non-quai-thao-long.png"
+    },
+    {
+      "id": "toc-bui-cai-tram",
+      "name": "Tóc Búi Cài Trâm Thời Trần",
+      "category": "hairstyles",
+      "category_name": "Kiểu Tóc & Khăn Vấn",
+      "dynasty_code": "LY_TRAN",
+      "dynasty_name": "Thời Lý - Trần",
+      "era_period": "1009 - 1400",
+      "image": "/static/seeds/cutouts/hairstyles/toc-bui-cai-tram.png"
+    },
+    {
+      "id": "toc-bui-tron",
+      "name": "Tóc Vấn Búi Tròn",
       "category": "hairstyles",
       "category_name": "Kiểu Tóc & Khăn Vấn",
       "dynasty_code": "DAN_GIAN",
-      "dynasty_name": "Thuần Việt Cổ Truyền",
-      "era_period": "Thời Lê - Nguyễn đến Thế kỷ XX",
-      "image": "/static/seeds/cutouts/hairstyles/toc-bui-tron.png",
-      "description": "Kiểu tóc truyền thống mộc mạc và quý phái của phụ nữ Việt: tóc được chải mượt rẽ ngôi giữa, cuốn tròn đều đặn quanh đầu ôm sát chân tóc, tạo hình vành tròn tự nhiên thanh tú.",
-      "cultural_guardrail": "Tóc vấn trần là biểu tượng bản sắc phụ nữ Việt qua nhiều thế kỷ. Không bới xù, không cắm hoa cài diêm dúa kiểu phong kiến ngoại lai.",
-      "remix_tip": "Phù hợp hoàn hảo với phong cách Clean Girl thẩm mỹ tối giản hiện đại khi diện áo dài hay áo sơ mi trắng."
-    },
-    {
-      "id": "khan-mo-qua-bac-bo",
-      "name": "Khăn Mỏ Quạ Dân Gian",
-      "category": "hairstyles",
-      "category_name": "Kiểu Tóc & Khăn Vấn",
-      "dynasty_code": "DAN_GIAN",
-      "dynasty_name": "Dân Gian Đồng Bằng Bắc Bộ",
+      "dynasty_name": "Dân Gian Cổ Truyền",
       "era_period": "Cổ truyền đến nay",
-      "image": "/static/seeds/cutouts/hairstyles/khan-trum-den.png",
-      "description": "Khăn lụa the đen vuông gấp chéo thành hình tam giác, trùm qua đỉnh đầu và gò má, thắt nút chắc chắn dưới cằm nhô ra hình chóp mỏ quạ duyên dáng.",
-      "cultural_guardrail": "Khăn mỏ quạ luôn đi đôi với hàm răng đen hạt huyền hoặc nụ cười kín đáo truyền thống, gắn liền với áo tứ thân và thắt lưng hoa đào.",
-      "remix_tip": "Biến tấu thành khăn bandana lụa thêu họa tiết truyền thống cho giới trẻ khi phối cùng streetwear năng động."
+      "image": "/static/seeds/cutouts/hairstyles/toc-bui-tron.png"
     },
     {
-      "id": "toc-duoi-ga-duyen-dang",
-      "name": "Tóc Đuôi Gà (Buông Lơi)",
+      "id": "toc-duoi-ga-ngan",
+      "name": "Tóc Đuôi Gà Buông Lơi",
       "category": "hairstyles",
       "category_name": "Kiểu Tóc & Khăn Vấn",
       "dynasty_code": "DAN_GIAN",
       "dynasty_name": "Dân Gian Cổ Truyền",
       "era_period": "Thế kỷ XVIII - XX",
-      "image": "/static/seeds/cutouts/hairstyles/toc-duoi-ga-ngan.png",
-      "description": "Mái tóc được vấn quanh đầu bằng dải vải lụa mềm, phần ngọn tóc để thừa chừa ra phía sau rủ xuống gáy như đuôi chim gà mềm mại rung rinh khi bước đi.",
-      "cultural_guardrail": "Nét văn hóa dân gian thi vị trong ca dao: Một thương tóc bỏ đuôi gà / Hai thương ăn nói mặn mà có duyên.",
-      "remix_tip": "Kiểu tóc tự nhiên, năng động cho các bạn trẻ diện cùng áo yếm cách tân hoặc áo thun mùa hè."
+      "image": "/static/seeds/cutouts/hairstyles/toc-duoi-ga-ngan.png"
     },
     {
-      "id": "khan-van-nhung-den",
-      "name": "Khăn Vấn Nhung Đen Quý Phái",
+      "id": "khan-trum-den",
+      "name": "Khăn Mỏ Quạ Đen",
+      "category": "hairstyles",
+      "category_name": "Kiểu Tóc & Khăn Vấn",
+      "dynasty_code": "DAN_GIAN",
+      "dynasty_name": "Dân Gian Bắc Bộ",
+      "era_period": "Cổ truyền đến nay",
+      "image": "/static/seeds/cutouts/hairstyles/khan-trum-den.png"
+    },
+    {
+      "id": "khan-vanh-vang-lon",
+      "name": "Khăn Vành Dây Vàng Hoàng Cung",
       "category": "hairstyles",
       "category_name": "Kiểu Tóc & Khăn Vấn",
       "dynasty_code": "NGUYEN_DYNASTY",
-      "dynasty_name": "Thời Nguyễn & Đầu Thế kỷ XX",
-      "era_period": "Thế kỷ XIX - XX",
-      "image": "/static/seeds/cutouts/hairstyles/khan-vanh-nau.png",
-      "description": "Vải nhung đen hoặc the đen may độn tơ bên trong, cuốn thành vành khăn đen tuyền trang nhã quấn quanh mái tóc của các tiểu thư đài các Hà Thành và Huế xưa.",
-      "cultural_guardrail": "Tôn vinh sự chỉn chu, đoan trang, nền nã của phụ nữ trung lưu và trí thức thời kỳ chuyển giao văn hóa đầu thế kỷ 20.",
-      "remix_tip": "Phối cùng kính râm mắt mèo gọng kim loại và áo khoác măng tô dáng dài Indochine."
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "1802 - 1945",
+      "image": "/static/seeds/cutouts/hairstyles/khan-vanh-vang-lon.png"
     },
     {
-      "id": "toc-bui-cai-tram-ngoc",
-      "name": "Tóc Búi Cài Trâm Ngọc Sen",
+      "id": "khan-vanh-do-tham",
+      "name": "Khăn Vành Dây Đỏ Thắm",
       "category": "hairstyles",
       "category_name": "Kiểu Tóc & Khăn Vấn",
-      "dynasty_code": "LY_TRAN",
-      "dynasty_name": "Thời Lý - Trần",
-      "era_period": "1009 - 1400",
-      "image": "/static/seeds/cutouts/hairstyles/toc-bui-cai-tram.png",
-      "description": "Mái tóc búi cao thanh thoát đĩnh ngộ trên đỉnh đầu, cài ngang một chiếc trâm ngọc sen xanh biếc, mang âm hưởng mỹ thuật Phật giáo thời Lý Trần.",
-      "cultural_guardrail": "Tóc búi tự nhiên, gọn gàng, toát lên phong thái thoát tục, an nhiên của thời kỳ thiền phái Trúc Lâm Yên Tử.",
-      "remix_tip": "Kiểu tóc thanh nhã cho các buổi tiệc tối hoặc sự kiện trang trọng kết hợp phụ kiện trâm cài ngọc bích."
+      "dynasty_code": "NGUYEN_DYNASTY",
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "1802 - 1945",
+      "image": "/static/seeds/cutouts/hairstyles/khan-vanh-do-tham.png"
     },
     {
-      "id": "khan-dong-nam-gioi",
-      "name": "Khăn Đóng / Khăn Xếp Nam Giới",
+      "id": "khan-vanh-tim",
+      "name": "Khăn Vành Tím Xứ Huế",
+      "category": "hairstyles",
+      "category_name": "Kiểu Tóc & Khăn Vấn",
+      "dynasty_code": "NGUYEN_DYNASTY",
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "Thế kỷ XIX - XX",
+      "image": "/static/seeds/cutouts/hairstyles/khan-vanh-tim.png"
+    },
+    {
+      "id": "khan-dong-nau",
+      "name": "Khăn Đóng / Khăn Xếp",
       "category": "hairstyles",
       "category_name": "Kiểu Tóc & Khăn Vấn",
       "dynasty_code": "NGUYEN_DYNASTY",
       "dynasty_name": "Triều Nguyễn & Dân Gian",
       "era_period": "Thế kỷ XIX - Nay",
-      "image": "/static/seeds/cutouts/hairstyles/khan-dong-nau.png",
-      "description": "Khăn vải the quấn nhiều nếp xếp nếp chữ Nhất hoặc chữ Nhân phía trước trán, dành cho nam giới khi mặc áo dài ngũ thân lập lĩnh.",
-      "cultural_guardrail": "Xếp nếp chữ Nhân tượng trưng cho lòng nhân ái, lễ tiết của đấng nam nhi quân tử.",
-      "remix_tip": "Phối cùng áo dài nam cách tân hiện đại và giày da cổ điển trong lễ cưới hoặc Tết cổ truyền."
+      "image": "/static/seeds/cutouts/hairstyles/khan-dong-nau.png"
     },
     {
-      "id": "tram-hoa-sen-ngoc",
-      "name": "Trâm Hoa Sen Ngọc Bích",
+      "id": "mao-phuong-hoang-hau",
+      "name": "Mão Phượng Cung Đình",
+      "category": "hairstyles",
+      "category_name": "Kiểu Tóc & Khăn Vấn",
+      "dynasty_code": "NGUYEN_DYNASTY",
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "Thế kỷ XIX - XX",
+      "image": "/static/seeds/cutouts/hairstyles/mao-phuong-hoang-hau.png"
+    },
+    {
+      "id": "khan-ran-trang",
+      "name": "Khăn Rằn Nam Bộ",
+      "category": "hairstyles",
+      "category_name": "Kiểu Tóc & Khăn Vấn",
+      "dynasty_code": "NAM_BO",
+      "dynasty_name": "Dân Gian Nam Bộ",
+      "era_period": "Thế kỷ XIX - Nay",
+      "image": "/static/seeds/cutouts/hairstyles/khan-ran-trang.png"
+    },
+    {
+      "id": "tran-trang-suc",
+      "name": "Trang Sức Thời Trần",
       "category": "jewelry",
-      "category_name": "Trang Sức Cổ Truyền",
+      "category_name": "Trang Sức",
       "dynasty_code": "LY_TRAN",
       "dynasty_name": "Thời Lý - Trần",
       "era_period": "1009 - 1400",
-      "image": "/static/seeds/cutouts/jewelry/tran-tram-cai-toc.png",
-      "description": "Cây trâm cài tóc bằng ngọc trắng và ngọc bích chạm khắc hình đóa sen hé nở mềm mại, lấy cảm hứng từ bệ sen gốm hoa nâu và đồ ngự dụng thời Trần.",
-      "cultural_guardrail": "Hoa sen là quốc hoa tâm linh của thời Lý Trần, đường nét chạm trổ uyển chuyển, thanh khiết, không phô trương cầu kỳ.",
-      "remix_tip": "Cài tóc búi thấp hiện đại phối cùng áo sơ mi lụa hoặc đầm dự tiệc trang nhã."
+      "image": "/static/seeds/cutouts/jewelry/tran-trang-suc.png"
     },
     {
-      "id": "tram-phuong-hoang-hau",
-      "name": "Trâm Cửu Phụng Dát Vàng Cung Đình",
+      "id": "tran-tram-cai-toc",
+      "name": "Trâm Cài Tóc Thời Trần",
       "category": "jewelry",
-      "category_name": "Trang Sức Cổ Truyền",
-      "dynasty_code": "NGUYEN_DYNASTY",
-      "dynasty_name": "Triều Nguyễn & Hậu Lê",
-      "era_period": "Thế kỷ XVII - XIX",
-      "image": "/static/seeds/cutouts/jewelry/nguyen-tram-cai-toc.png",
-      "description": "Trâm vàng chạm hình chim phượng hoàng ngậm hạt ngọc trai, đuôi chim uốn lượn tinh xảo bằng kỹ thuật đậu bạc dát vàng truyền thống Đồng Xâm.",
-      "cultural_guardrail": "Đồ án chim phượng biểu trưng cho Hoàng hậu và Mẫu nghi thiên hạ, quy chế nghiêm ngặt không dùng bừa bãi trong thường dân xưa.",
-      "remix_tip": "Trang sức cài áo dạ hội hoặc điểm nhấn cho khăn choàng lụa cao cấp."
+      "category_name": "Trang Sức",
+      "dynasty_code": "LY_TRAN",
+      "dynasty_name": "Thời Lý - Trần",
+      "era_period": "1009 - 1400",
+      "image": "/static/seeds/cutouts/jewelry/tran-tram-cai-toc.png"
     },
     {
-      "id": "vong-co-kim-tien",
-      "name": "Vòng Cổ Kim Tiền Phú Quý",
+      "id": "tran-phu-kien",
+      "name": "Bội Ngọc & Phụ Kiện Thời Trần",
       "category": "jewelry",
-      "category_name": "Trang Sức Cổ Truyền",
+      "category_name": "Trang Sức",
+      "dynasty_code": "LY_TRAN",
+      "dynasty_name": "Thời Lý - Trần",
+      "era_period": "1009 - 1400",
+      "image": "/static/seeds/cutouts/jewelry/tran-phu-kien.png"
+    },
+    {
+      "id": "le-trang-suc",
+      "name": "Trang Sức Thời Hậu Lê",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "LE_MAC",
+      "dynasty_name": "Thời Hậu Lê",
+      "era_period": "1428 - 1788",
+      "image": "/static/seeds/cutouts/jewelry/le-trang-suc.png"
+    },
+    {
+      "id": "le-tram-cai-toc",
+      "name": "Trâm Cài Tóc Thời Hậu Lê",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "LE_MAC",
+      "dynasty_name": "Thời Hậu Lê",
+      "era_period": "1428 - 1788",
+      "image": "/static/seeds/cutouts/jewelry/le-tram-cai-toc.png"
+    },
+    {
+      "id": "le-phu-kien",
+      "name": "Bội Ngọc Thời Hậu Lê",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "LE_MAC",
+      "dynasty_name": "Thời Hậu Lê",
+      "era_period": "1428 - 1788",
+      "image": "/static/seeds/cutouts/jewelry/le-phu-kien.png"
+    },
+    {
+      "id": "nguyen-trang-suc",
+      "name": "Trang Sức Cung Đình Nguyễn",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
       "dynasty_code": "NGUYEN_DYNASTY",
       "dynasty_name": "Triều Nguyễn",
       "era_period": "1802 - 1945",
-      "image": "/static/seeds/cutouts/jewelry/nguyen-trang-suc.png",
-      "description": "Chuỗi dây chuyền vàng đúc hình các đồng tiền cổ xâu chỉ lụa, mang ý nghĩa cầu chúc tài lộc, gia đạo hưng vượng và phúc thọ vẹn toàn.",
-      "cultural_guardrail": "Đồng tiền thời Nguyễn đúc sắc nét chữ Nôm hoặc chữ Hán vương triều, mang giá trị văn hóa và phong thủy sâu sắc.",
-      "remix_tip": "Layering chuỗi kim tiền cùng áo thun cổ tròn trắng và áo khoác ngoài tối giản."
+      "image": "/static/seeds/cutouts/jewelry/nguyen-trang-suc.png"
     },
     {
-      "id": "ngoc-boi-khac-rong",
-      "name": "Bội Ngọc Khắc Long Phụng Cung Đình",
+      "id": "nguyen-tram-cai-toc",
+      "name": "Trâm Cài Tóc Cung Đình Nguyễn",
       "category": "jewelry",
-      "category_name": "Trang Sức Cổ Truyền",
-      "dynasty_code": "LE_MAC",
-      "dynasty_name": "Thời Hậu Lê & Nguyễn",
-      "era_period": "Thế kỷ XV - XIX",
-      "image": "/static/seeds/cutouts/jewelry/le-trang-suc.png",
-      "description": "Miếng ngọc bích chạm khắc hoa văn rồng mây tinh tế, kết nối cùng dải lụa ngũ sắc và tua rua hạt ngọc để đeo bên hông tà áo, phát ra âm thanh thanh tao khi chuyển bước.",
-      "cultural_guardrail": "Biểu trưng của bậc quân tử đức hạnh tiếng ngọc vang xa như lời nói người hiền triết, tuyệt đối tránh nhầm sang bùa chú hay phụ kiện đồ chơi.",
-      "remix_tip": "Treo charm trang trí túi xách da hiện đại hoặc thắt lưng váy cạp cao tạo phong vị Á Đông độc bản."
-    },
-    {
-      "id": "khuyen-tai-giot-le",
-      "name": "Khuyên Tai Ngọc Giọt Lệ",
-      "category": "jewelry",
-      "category_name": "Trang Sức Cổ Truyền",
-      "dynasty_code": "LY_TRAN",
-      "dynasty_name": "Thời Lý - Trần",
-      "era_period": "1009 - 1400",
-      "image": "/static/seeds/cutouts/jewelry/tran-trang-suc.png",
-      "description": "Hoa tai bằng ngọc trắng mài nhẵn hình giọt nước buông nhẹ, thanh lịch và trang nhã theo phong cách phụ nữ quý tộc Đại Việt xưa.",
-      "cultural_guardrail": "Nét đẹp tối giản thuần khiết của trang sức thời Lý Trần, tôn vinh vẻ đẹp tự nhiên của người phụ nữ.",
-      "remix_tip": "Phù hợp với mọi outfit công sở đương đại, tinh tế và không bao giờ lỗi mốt."
-    },
-    {
-      "id": "quat-lua-theu-tay-cung-dinh",
-      "name": "Quạt Lụa Tròn Thêu Tay Cung Đình",
-      "category": "jewelry",
-      "category_name": "Trang Sức Cổ Truyền",
+      "category_name": "Trang Sức",
       "dynasty_code": "NGUYEN_DYNASTY",
-      "dynasty_name": "Triều Nguyễn & Hậu Lê",
-      "era_period": "Thế kỷ XVIII - XX",
-      "image": "/static/seeds/cutouts/jewelry/nguyen-phu-kien.png",
-      "description": "Quạt lụa tròn căng trên nan trúc uốn cong, mặt quạt thêu tay cảnh hoa sen, chim én hoặc thơ đề vịnh xuân của cung nữ xứ kinh kỳ.",
-      "cultural_guardrail": "Vật bất ly thân của các quý cô quyền quý xưa trong sinh hoạt giao tế mùa hạ, biểu trưng cho sự kín đáo, đoan trang.",
-      "remix_tip": "Đạo cụ chụp ảnh lookbook nghệ thuật và quà tặng văn hóa thủ công mỹ nghệ cao cấp."
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "1802 - 1945",
+      "image": "/static/seeds/cutouts/jewelry/nguyen-tram-cai-toc.png"
     },
     {
-      "id": "hai-theu-cung-dinh-nguyen",
-      "name": "Hài Thêu Mũi Cong Hoàng Cung",
-      "category": "footwear",
-      "category_name": "Hài & Guốc Cổ Truyền",
+      "id": "nguyen-phu-kien",
+      "name": "Bội Ngọc & Phụ Kiện Triều Nguyễn",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
       "dynasty_code": "NGUYEN_DYNASTY",
-      "dynasty_name": "Triều Nguyễn & Hậu Lê",
-      "era_period": "Thế kỷ XVIII - XIX",
-      "image": "/static/seeds/cutouts/jewelry/nguyen-phu-kien.png",
-      "description": "Đôi hài gấm thêu kim tuyến hoa sen uốn cong vểnh lên phía mũi, lót lụa mềm mại, bước đi nhẹ nhàng tôn quý của bậc cung phi quý tộc.",
-      "cultural_guardrail": "Dáng mũi hài cong vểnh đặc trưng hoàng gia Đại Việt, đế bọc vải êm ái tôn phong thái khoan thai đài các.",
-      "remix_tip": "Phối cùng áo Nhật Bình hoặc áo Tấc trong bộ ảnh di sản cung đình."
+      "dynasty_name": "Triều Nguyễn",
+      "era_period": "1802 - 1945",
+      "image": "/static/seeds/cutouts/jewelry/nguyen-phu-kien.png"
     },
     {
-      "id": "guoc-moc-quai-nhung",
-      "name": "Guốc Mộc Quai Nhung Đỏ",
-      "category": "footwear",
-      "category_name": "Hài & Guốc Cổ Truyền",
-      "dynasty_code": "DAN_GIAN",
-      "dynasty_name": "Dân Gian Kinh Bắc & Đồng Bằng",
-      "era_period": "Cổ truyền đến Thế kỷ XX",
-      "image": "/static/seeds/cutouts/jewelry/nguyen-trang-suc.png",
-      "description": "Guốc gỗ vông đẽo mộc mạc sơn then hoặc chuốt bóng mài nhẵn, quai nhung đỏ điều êm ái, mang nét duyên thanh thoát bình dị của phụ nữ thôn dã Kinh Bắc.",
-      "cultural_guardrail": "Guốc mộc thuần túy dân tộc Việt, vóc dáng thon gọn nhẹ nhàng, gắn liền với nón quai thao và áo tứ thân.",
-      "remix_tip": "Tôn vinh dáng dấp mộc mạc khi diện áo tứ thân hoặc áo ngũ thân truyền thống."
+      "id": "dinh-trang-suc",
+      "name": "Trang Sức Thời Đinh",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "DINH",
+      "dynasty_name": "Thời Đinh",
+      "era_period": "968 - 980",
+      "image": "/static/seeds/cutouts/jewelry/dinh-trang-suc.png"
     },
     {
-      "id": "hai-da-cong-hau-le-tran",
-      "name": "Hài Dạ Đen Quan Viên Triều Hội",
-      "category": "footwear",
-      "category_name": "Hài & Guốc Cổ Truyền",
-      "dynasty_code": "LY_TRAN",
-      "dynasty_name": "Thời Lý - Trần & Hậu Lê",
-      "era_period": "Thế kỷ XIII - XV",
-      "image": "/static/seeds/cutouts/jewelry/tran-trang-suc.png",
-      "description": "Hài dạ đen mũi vuông trang nghiêm, đế đệm nhiều lớp sơn then, phụ kiện phẩm phục triều hội của văn quan võ tướng thời Lý - Trần.",
-      "cultural_guardrail": "Hài đại triều giản dị mà tôn nghiêm, giữ đúng phong cách chuẩn mực quân tử Đại Việt thời trung đại.",
-      "remix_tip": "Trang phục tái hiện lịch sử hào hùng và điển lễ bang giao Đại Việt."
+      "id": "dinh-tram-cai-toc",
+      "name": "Trâm Cài Tóc Thời Đinh",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "DINH",
+      "dynasty_name": "Thời Đinh",
+      "era_period": "968 - 980",
+      "image": "/static/seeds/cutouts/jewelry/dinh-tram-cai-toc.png"
+    },
+    {
+      "id": "dinh-phu-kien",
+      "name": "Phụ Kiện Thời Đinh",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "DINH",
+      "dynasty_name": "Thời Đinh",
+      "era_period": "968 - 980",
+      "image": "/static/seeds/cutouts/jewelry/dinh-phu-kien.png"
+    },
+    {
+      "id": "ngo-trang-suc",
+      "name": "Trang Sức Thời Ngô",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "NGO",
+      "dynasty_name": "Thời Ngô",
+      "era_period": "939 - 965",
+      "image": "/static/seeds/cutouts/jewelry/ngo-trang-suc.png"
+    },
+    {
+      "id": "ngo-tram-cai-toc",
+      "name": "Trâm Cài Tóc Thời Ngô",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "NGO",
+      "dynasty_name": "Thời Ngô",
+      "era_period": "939 - 965",
+      "image": "/static/seeds/cutouts/jewelry/ngo-tram-cai-toc.png"
+    },
+    {
+      "id": "ngo-phu-kien",
+      "name": "Phụ Kiện Thời Ngô",
+      "category": "jewelry",
+      "category_name": "Trang Sức",
+      "dynasty_code": "NGO",
+      "dynasty_name": "Thời Ngô",
+      "era_period": "939 - 965",
+      "image": "/static/seeds/cutouts/jewelry/ngo-phu-kien.png"
     }
   ]
 }

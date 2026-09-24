@@ -219,6 +219,7 @@
       },
       "cover_image": "/static/seeds/images/ao-tac-cover.jpeg",
       "gallery": [
+        "/static/seeds/images/ao-tac-cover.jpeg",
         "/static/seeds/images/ao-tac-gallery-1.jpg"
       ],
       "remix_image": "/static/seeds/images/ao-tac-remix.jpg",
@@ -257,8 +258,9 @@
         "formula": "Áo Ngũ Thân Tay Chẽn tone chàm mộc + Quần âu ống rộng xếp ly (Wide Pleated Trousers) + Giày da Loafer hoặc Sneaker trắng tối giản + Mắt kính gọng tròn cổ điển.",
         "suitable_for": "Thuyết trình giảng đường đại học, làm việc tại Creative Agency, dạo phố cuối tuần."
       },
-      "cover_image": "/static/seeds/images/ao-ngu-than-tay-chen-remix.jpg",
+      "cover_image": "/static/seeds/images/ao-ngu-than-tay-chen-cover.jpg",
       "gallery": [
+        "/static/seeds/images/ao-ngu-than-tay-chen-cover.jpg",
         "/static/seeds/images/ao-ngu-than-tay-chen-gallery-1.jpg"
       ],
       "remix_image": "/static/seeds/images/ao-ngu-than-tay-chen-remix.jpg",
@@ -299,8 +301,8 @@
       },
       "cover_image": "/static/seeds/images/ao-nhat-binh-cover.jpg",
       "gallery": [
-        "/static/seeds/images/ao-nhat-binh-gallery-1.jpg",
-        "/static/seeds/images/ao-nhat-binh-gallery-2.jpg"
+        "/static/seeds/images/ao-nhat-binh-cover.jpg",
+        "/static/seeds/images/ao-nhat-binh-gallery-1.jpg"
       ],
       "remix_image": "/static/seeds/images/ao-nhat-binh-remix.jpg",
       "cutout_image": "/static/seeds/cutouts/costumes/nguyen-princess-nhat-binh.png"
@@ -381,6 +383,7 @@
       },
       "cover_image": "/static/seeds/images/ao-ba-ba-cover.jpg",
       "gallery": [
+        "/static/seeds/images/ao-ba-ba-cover.jpg",
         "/static/seeds/images/ao-ba-ba-gallery-1.jpg"
       ],
       "remix_image": "/static/seeds/images/ao-ba-ba-cover.jpg",
@@ -421,6 +424,7 @@
       },
       "cover_image": "/static/seeds/images/ao-dai-lemur-le-pho-cover.png",
       "gallery": [
+        "/static/seeds/images/ao-dai-lemur-le-pho-cover.png",
         "/static/seeds/images/ao-dai-lemur-le-pho-gallery-1.jpg"
       ],
       "remix_image": "/static/seeds/images/ao-dai-lemur-le-pho-remix.jpg",
@@ -540,7 +544,9 @@
         "suitable_for": "Mùa đông Hà Nội, du lịch Sa Pa/Hà Giang, sự kiện triển lãm thời trang đương đại."
       },
       "cover_image": "/static/seeds/images/trang-phuc-dao-do-cover.jpg",
-      "gallery": [],
+      "gallery": [
+        "/static/seeds/images/trang-phuc-dao-do-cover.jpg"
+      ],
       "remix_image": "/static/seeds/images/trang-phuc-dao-do-cover.jpg",
       "cutout_image": "/static/seeds/images/trang-phuc-dao-do-cover.jpg"
     },
@@ -578,7 +584,9 @@
         "suitable_for": "Sự kiện thời trang dạ tiệc, tuần lễ thời trang Việt Nam, chụp ảnh Lookbook hiện đại."
       },
       "cover_image": "/static/seeds/images/trang-phuc-thai-den-cover.jpg",
-      "gallery": [],
+      "gallery": [
+        "/static/seeds/images/trang-phuc-thai-den-cover.jpg"
+      ],
       "remix_image": "/static/seeds/images/trang-phuc-thai-den-remix.jpg",
       "cutout_image": "/static/seeds/images/trang-phuc-thai-den-cover.jpg"
     },
