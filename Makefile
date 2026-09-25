@@ -1,10 +1,12 @@
-.PHONY: help install backend frontend dev test build clean
+.PHONY: help install backend frontend dev test build clean stop restart
 
 help:
 	@echo "=================================================================="
 	@echo "              VIỆT PHỤC REMIX - DEVELOPMENT COMMANDS             "
 	@echo "=================================================================="
 	@echo "  make backend         : Chạy FastAPI backend (cổng 8000, reload)"
+	@echo "  make stop            : Dọn/tắt các tiến trình đang chiếm cổng 8000"
+	@echo "  make restart         : Giải phóng cổng 8000 và khởi động lại backend"
 	@echo "  make frontend        : Chạy React/Vite frontend (cổng 5173)"
 	@echo "  make dev             : Chạy đồng thời cả Backend & Frontend"
 	@echo "  make test            : Chạy bộ kiểm thử backend (pytest)"
@@ -16,6 +18,14 @@ help:
 # 1. Chạy Backend FastAPI
 backend:
 	PYTHONPATH=backend:. uv run uvicorn app.main:app --app-dir backend --reload --host 127.0.0.1 --port 8000
+
+# Dọn tiến trình đang chiếm cổng 8000 nếu có
+stop:
+	@fuser -k 8000/tcp 2>/dev/null || true
+	@echo "Đã giải phóng cổng 8000."
+
+# Giải phóng cổng và khởi động lại
+restart: stop backend
 
 # 2. Chạy Frontend Vite
 frontend:
