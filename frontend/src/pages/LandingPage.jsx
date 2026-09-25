@@ -1,4 +1,6 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const FEATURED_HIGHLIGHTS = [
   {
@@ -31,10 +33,18 @@ const FEATURED_HIGHLIGHTS = [
   }
 ];
 
-export default function LandingPage({
-  onExploreCatalog,
-  onStartStudio
-}) {
+export default function LandingPage({ onStartStudio }) {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleStartMix = () => {
+    if (!isAuthenticated) {
+      if (onStartStudio) onStartStudio('/studio');
+    } else {
+      navigate('/studio');
+    }
+  };
+
   return (
     <div className="landing-page-container">
       {/* 1. HERO SECTION */}
@@ -58,7 +68,7 @@ export default function LandingPage({
             <button
               type="button"
               className="landing-btn-primary"
-              onClick={onExploreCatalog}
+              onClick={() => navigate('/catalog')}
             >
               KHÁM PHÁ DI SẢN
             </button>
@@ -66,7 +76,7 @@ export default function LandingPage({
             <button
               type="button"
               className="landing-btn-secondary"
-              onClick={onStartStudio}
+              onClick={handleStartMix}
             >
               BẮT ĐẦU PHỐI ĐỒ
             </button>
@@ -80,7 +90,7 @@ export default function LandingPage({
               <div
                 key={item.id}
                 className="showcase-arch-card"
-                onClick={onExploreCatalog}
+                onClick={() => navigate('/catalog')}
                 title={`Xem chi tiết ${item.title}`}
               >
                 <div className="arch-img-frame">

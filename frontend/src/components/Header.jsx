@@ -1,13 +1,27 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function Header({
-  activeTab,
-  setActiveTab,
-  onOpenAuth,
-  onOpenStudio
-}) {
+export default function Header({ onOpenAuth }) {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavigateStudio = () => {
+    if (!isAuthenticated) {
+      if (onOpenAuth) onOpenAuth('/studio');
+    } else {
+      navigate('/studio');
+    }
+  };
+
+  const handleNavigateProfile = () => {
+    if (!isAuthenticated) {
+      if (onOpenAuth) onOpenAuth('/profile');
+    } else {
+      navigate('/profile');
+    }
+  };
 
   return (
     <header className="editorial-header">
@@ -15,7 +29,7 @@ export default function Header({
       <div
         className="brand-title"
         style={{ cursor: 'pointer' }}
-        onClick={() => setActiveTab('landing')}
+        onClick={() => navigate('/')}
         title="Về Trang Giới Thiệu"
       >
         <div className="brand-seal">VP</div>
@@ -26,22 +40,16 @@ export default function Header({
       <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button
           type="button"
-          onClick={() => setActiveTab('catalog')}
-          className={`header-nav-btn ${activeTab === 'catalog' ? 'active' : ''}`}
+          onClick={() => navigate('/catalog')}
+          className={`header-nav-btn ${location.pathname === '/catalog' ? 'active' : ''}`}
         >
           Khám Phá Di Sản
         </button>
 
         <button
           type="button"
-          onClick={() => {
-            if (onOpenStudio) {
-              onOpenStudio();
-            } else {
-              setActiveTab('studio');
-            }
-          }}
-          className={`header-nav-btn ${activeTab === 'studio' ? 'active' : ''}`}
+          onClick={handleNavigateStudio}
+          className={`header-nav-btn ${location.pathname === '/studio' ? 'active' : ''}`}
         >
           Mix Studio AI
         </button>
@@ -50,8 +58,8 @@ export default function Header({
         {isAuthenticated ? (
           <button
             type="button"
-            onClick={() => setActiveTab('profile')}
-            className={`header-nav-btn profile-btn ${activeTab === 'profile' ? 'active' : ''}`}
+            onClick={handleNavigateProfile}
+            className={`header-nav-btn profile-btn ${location.pathname === '/profile' ? 'active' : ''}`}
             title="Xem hồ sơ và các Lookbook đã lưu"
           >
             <span className="profile-indicator">●</span>
@@ -60,7 +68,7 @@ export default function Header({
         ) : (
           <button
             type="button"
-            onClick={onOpenAuth}
+            onClick={() => onOpenAuth && onOpenAuth()}
             className="header-login-btn"
             title="Đăng nhập tài khoản"
           >
@@ -71,3 +79,4 @@ export default function Header({
     </header>
   );
 }
+

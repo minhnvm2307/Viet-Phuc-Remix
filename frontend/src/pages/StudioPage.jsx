@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+// Khóa lưu bản nháp Studio trong localStorage
+const DRAFT_KEY = 'vietphuc_studio_draft';
 
 // Bảng màu sắc trang phục cung đình & dân gian
 const COLOR_SWATCHES = [
@@ -67,6 +71,17 @@ const getDynastyForCostume = (costume) => {
   return null;
 };
 
+// Hàm đọc an toàn bản nháp từ localStorage
+const loadSavedDraft = () => {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {
+    console.error('Lỗi đọc bản nháp studio từ localStorage:', err);
+  }
+  return null;
+};
+
 export default function StudioPage({
   initialCostume,
   initialAccessory = null,
@@ -74,26 +89,33 @@ export default function StudioPage({
   onRequireAuth
 }) {
   const { isAuthenticated, token } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const costumeQueryId = searchParams.get('costume');
+
+  // Khôi phục bản nháp ban đầu
+  const initialDraft = React.useMemo(() => loadSavedDraft(), []);
+  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
+
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [costumes, setCostumes] = useState([]);
   const [selectedCostume, setSelectedCostume] = useState(initialCostume || null);
-  const [selectedColor, setSelectedColor] = useState(COLOR_SWATCHES[0]);
+  const [selectedColor, setSelectedColor] = useState(initialDraft?.selectedColor || COLOR_SWATCHES[0]);
 
   // Phụ kiện từ backend và từ điển phụ kiện đang chọn (key theo category: max 1 món mỗi category)
   const [allAccessories, setAllAccessories] = useState([]);
-  const [selectedAccessories, setSelectedAccessories] = useState({});
-  const [activeAccTab, setActiveAccTab] = useState('headwear');
+  const [selectedAccessories, setSelectedAccessories] = useState(initialDraft?.selectedAccessories || {});
+  const [activeAccTab, setActiveAccTab] = useState(initialDraft?.activeAccTab || 'headwear');
 
   // Ảnh tải lên của người dùng
   const [userPhoto, setUserPhoto] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Ảnh từ Gallery của trang phục dùng để ghép: mặc định là ảnh đầu tiên trong list gallery
-  const [selectedCostumeImage, setSelectedCostumeImage] = useState(null);
+  // Ảnh từ Gallery của trang phục dùng để ghép
+  const [selectedCostumeImage, setSelectedCostumeImage] = useState(initialDraft?.selectedCostumeImage || null);
 
   // ChatGPT prompt bar & Trạng thái sinh AI
-  const [mixPrompt, setMixPrompt] = useState('');
+  const [mixPrompt, setMixPrompt] = useState(initialDraft?.mixPrompt || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGeneratedOnce, setHasGeneratedOnce] = useState(false);
   const [activeProposalIndex, setActiveProposalIndex] = useState(0);
@@ -103,48 +125,49 @@ export default function StudioPage({
     ? selectedCostume.gallery
     : [selectedCostume?.cover_image].filter(Boolean);
 
-  // Khi selectedCostume thay đổi:
-  // 1. Tự động chọn ảnh ĐẦU TIÊN trong list gallery làm ảnh ghép
-  // 2. RESET TOÀN BỘ trạng thái output (Chưa bấm Tạo Ảnh thì tuyệt đối không được hiện output)
-  useEffect(() => {
-    if (costumeGallery.length > 0) {
-      setSelectedCostumeImage(costumeGallery[0]);
-    }
-    setHasGeneratedOnce(false);
-    setIsGenerating(false);
-    setActiveProposalIndex(0);
-  }, [selectedCostume?.id]);
-
   // Khi thay đổi ảnh user, reset output (phải bấm Tạo Ảnh mới render lại)
   useEffect(() => {
     setHasGeneratedOnce(false);
     setIsGenerating(false);
   }, [userPhoto]);
 
-  // Tải danh sách trang phục
+  // Tải danh sách trang phục và đồng bộ theo Query Param hoặc Draft
   useEffect(() => {
     fetch('/api/heritage/costumes')
       .then((res) => res.json())
       .then((data) => {
         if (data.costumes && data.costumes.length > 0) {
           setCostumes(data.costumes);
-          if (!selectedCostume) {
-            setSelectedCostume(data.costumes[0]);
-          } else {
-            const matched = data.costumes.find((c) => c.id === selectedCostume.id);
-            if (matched) setSelectedCostume(matched);
+          let target = null;
+          if (costumeQueryId) {
+            target = data.costumes.find((c) => c.id === costumeQueryId);
           }
+          if (!target && initialDraft?.costumeId) {
+            target = data.costumes.find((c) => c.id === initialDraft.costumeId);
+          }
+          if (!target && initialCostume) {
+            target = data.costumes.find((c) => c.id === initialCostume.id) || initialCostume;
+          }
+          if (!target) {
+            target = data.costumes[0];
+          }
+          setSelectedCostume(target);
+
+          // Khôi phục ảnh gallery nền
+          const gallery = (target?.gallery && target.gallery.length > 0)
+            ? target.gallery
+            : [target?.cover_image].filter(Boolean);
+          if (initialDraft?.selectedCostumeImage && gallery.includes(initialDraft.selectedCostumeImage)) {
+            setSelectedCostumeImage(initialDraft.selectedCostumeImage);
+          } else if (gallery.length > 0) {
+            setSelectedCostumeImage(gallery[0]);
+          }
+
+          setHasHydratedDraft(true);
         }
       })
       .catch((err) => console.error('Error fetching costumes:', err));
-  }, []);
-
-  // Cập nhật khi prop initialCostume thay đổi
-  useEffect(() => {
-    if (initialCostume) {
-      setSelectedCostume(initialCostume);
-    }
-  }, [initialCostume]);
+  }, [costumeQueryId]);
 
   // Tải toàn bộ danh mục phụ kiện từ backend
   useEffect(() => {
@@ -158,7 +181,26 @@ export default function StudioPage({
       .catch((err) => console.error('Error fetching accessories:', err));
   }, []);
 
-  // 1. PHÂN LOẠI ĐÚNG THEO TRIỀU ĐẠI CỦA TRANG PHỤC ĐANG CHỌN
+  // Tự động lưu bản nháp vào localStorage mỗi khi có thay đổi
+  useEffect(() => {
+    if (!hasHydratedDraft || !selectedCostume) return;
+    const draftData = {
+      costumeId: selectedCostume.id,
+      selectedCostumeImage: selectedCostumeImage,
+      selectedColor: selectedColor,
+      selectedAccessories: selectedAccessories,
+      activeAccTab: activeAccTab,
+      mixPrompt: mixPrompt,
+      updatedAt: Date.now()
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
+    } catch (err) {
+      // quota or private browsing mode
+    }
+  }, [hasHydratedDraft, selectedCostume?.id, selectedCostumeImage, selectedColor, selectedAccessories, activeAccTab, mixPrompt]);
+
+  // Phân loại phụ kiện theo triều đại
   const matchedAccessories = React.useMemo(() => {
     const allowed = getDynastyForCostume(selectedCostume);
     if (!allowed) return allAccessories;
@@ -166,21 +208,50 @@ export default function StudioPage({
     return filtered.length > 0 ? filtered : allAccessories;
   }, [selectedCostume, allAccessories]);
 
-  // Khi đổi trang phục, tự động chuyển tab phù hợp và chỉ gợi ý tối đa 1 món phụ kiện hợp triều đại
-  useEffect(() => {
-    if (matchedAccessories.length > 0) {
-      const initialMap = {};
-      if (initialAccessory && matchedAccessories.some((a) => a.id === initialAccessory.id)) {
-        initialMap[initialAccessory.category] = initialAccessory;
-      } else {
-        const defHead = matchedAccessories.find((a) => a.category === 'headwear');
-        if (defHead) initialMap[defHead.category] = defHead;
-      }
-      setSelectedAccessories(initialMap);
-    } else {
-      setSelectedAccessories({});
+  // Xử lý đổi trang phục từ danh sách thanh ngang
+  const handleSelectCostume = (costume) => {
+    if (costume.id === selectedCostume?.id) return;
+    setSelectedCostume(costume);
+    const gallery = (costume.gallery && costume.gallery.length > 0)
+      ? costume.gallery
+      : [costume.cover_image].filter(Boolean);
+    setSelectedCostumeImage(gallery[0] || null);
+
+    // Gợi ý 1 món mũ nón mặc định hợp triều đại mới
+    const allowed = getDynastyForCostume(costume);
+    const dynastyAcc = allAccessories.filter((a) => !allowed || allowed.includes(a.dynasty_code) || a.dynasty_code === 'ALL');
+    const defHead = dynastyAcc.find((a) => a.category === 'headwear');
+    setSelectedAccessories(defHead ? { [defHead.category]: defHead } : {});
+
+    setHasGeneratedOnce(false);
+    setIsGenerating(false);
+    setActiveProposalIndex(0);
+
+    // Cập nhật URL Query Param
+    setSearchParams({ costume: costume.id }, { replace: true });
+  };
+
+  // Đặt lại bản phối (Clear Draft)
+  const handleResetDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch (err) {}
+    setSelectedAccessories({});
+    setMixPrompt('');
+    setSelectedColor(COLOR_SWATCHES[0]);
+    if (costumes.length > 0) {
+      const first = costumes[0];
+      setSelectedCostume(first);
+      const gallery = (first.gallery && first.gallery.length > 0)
+        ? first.gallery
+        : [first.cover_image].filter(Boolean);
+      setSelectedCostumeImage(gallery[0] || null);
+      setSearchParams({ costume: first.id }, { replace: true });
     }
-  }, [selectedCostume?.id, matchedAccessories]);
+    setHasGeneratedOnce(false);
+    setIsGenerating(false);
+    setActiveProposalIndex(0);
+  };
 
   // Xử lý file ảnh tải lên
   const handleImageFile = (file) => {
@@ -344,6 +415,15 @@ export default function StudioPage({
           </button>
           <span className="bar-label">TRANG PHỤC NỀN:</span>
           <span className="costume-count-badge">({costumes.length} mẫu di sản)</span>
+          <button
+            type="button"
+            onClick={handleResetDraft}
+            className="btn-back-link"
+            style={{ marginLeft: 'auto', background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+            title="Xóa dữ liệu nháp đang phối và làm mới"
+          >
+            ĐẶT LẠI BẢN PHỐI
+          </button>
         </div>
 
         {/* Danh sách trang phục nền đầy đủ cả 16 mẫu */}
@@ -354,7 +434,7 @@ export default function StudioPage({
               <button
                 key={c.id}
                 className={`costume-pill ${isSelected ? 'active' : ''}`}
-                onClick={() => setSelectedCostume(c)}
+                onClick={() => handleSelectCostume(c)}
               >
                 <span>{c.name}</span>
               </button>

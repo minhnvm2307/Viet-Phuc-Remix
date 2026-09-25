@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import LandingPage from './pages/LandingPage';
 import HeritageCatalog from './pages/HeritageCatalog';
@@ -8,97 +9,103 @@ import AuthModal from './components/AuthModal';
 import { useAuth } from './context/AuthContext';
 import { ShieldCheck } from 'lucide-react';
 
+// Tự động cuộn lên đầu trang khi chuyển Route
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+}
+
 export default function App() {
   const { isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState('landing');
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStudioCostume, setSelectedStudioCostume] = useState(null);
-  const [selectedStudioAccessory, setSelectedStudioAccessory] = useState(null);
-  const [studioInitialMode, setStudioInitialMode] = useState('gallery');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [redirectPathAfterAuth, setRedirectPathAfterAuth] = useState(null);
 
-  // Xử lý chuyển từ Catalog sang Studio
-  const handleSelectForStudio = (costume, mode = 'gallery', accessory = null) => {
-    setSelectedStudioCostume(costume);
-    setSelectedStudioAccessory(accessory);
-    setStudioInitialMode(mode);
-
-    if (!isAuthenticated) {
-      setIsAuthModalOpen(true);
-    } else {
-      setActiveTab('studio');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  // Mở Auth modal với đường dẫn chuyển hướng sau khi đăng nhập
+  const handleOpenAuth = (targetPath = null) => {
+    setRedirectPathAfterAuth(targetPath);
+    setIsAuthModalOpen(true);
   };
 
   // Mở Studio từ nút điều hướng chung
-  const handleOpenStudio = () => {
+  const handleOpenStudio = (targetPath = '/studio') => {
     if (!isAuthenticated) {
-      setIsAuthModalOpen(true);
+      handleOpenAuth(targetPath);
     } else {
-      setActiveTab('studio');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigate(targetPath);
+    }
+  };
+
+  // Xử lý chuyển từ Catalog sang Studio với trang phục cụ thể
+  const handleSelectForStudio = (costume, mode = 'gallery', accessory = null) => {
+    const targetUrl = `/studio?costume=${costume.id}`;
+    if (!isAuthenticated) {
+      handleOpenAuth(targetUrl);
+    } else {
+      navigate(targetUrl);
     }
   };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <ScrollToTop />
+
       {/* Sticky Header Tinh Gọn */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={(tab) => {
-          setActiveTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onOpenAuth={() => setIsAuthModalOpen(true)}
-        onOpenStudio={handleOpenStudio}
-      />
+      <Header onOpenAuth={handleOpenAuth} />
 
-      {/* Main Content Area */}
+      {/* Main Content Area với React Router */}
       <main style={{ flex: 1 }}>
-        {/* 1. TRANG LANDING GIỚI THIỆU */}
-        {activeTab === 'landing' && (
-          <LandingPage
-            onExploreCatalog={() => {
-              setActiveTab('catalog');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onStartStudio={handleOpenStudio}
+        <Routes>
+          {/* 1. TRANG LANDING GIỚI THIỆU */}
+          <Route
+            path="/"
+            element={
+              <LandingPage
+                onStartStudio={() => handleOpenStudio('/studio')}
+              />
+            }
           />
-        )}
 
-        {/* 2. TRANG CHÍNH - KHÁM PHÁ DI SẢN */}
-        {activeTab === 'catalog' && (
-          <HeritageCatalog
-            searchQuery={searchQuery}
-            onSelectForStudio={handleSelectForStudio}
+          {/* 2. TRANG CHÍNH - KHÁM PHÁ DI SẢN */}
+          <Route
+            path="/catalog"
+            element={
+              <HeritageCatalog
+                searchQuery={searchQuery}
+                onSelectForStudio={handleSelectForStudio}
+              />
+            }
           />
-        )}
 
-        {/* 3. TRANG MIX STUDIO AI */}
-        {activeTab === 'studio' && (
-          <StudioPage
-            initialCostume={selectedStudioCostume}
-            initialAccessory={selectedStudioAccessory}
-            initialMode={studioInitialMode}
-            onRequireAuth={() => setIsAuthModalOpen(true)}
-            onBackToCatalog={() => {
-              setActiveTab('catalog');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+          {/* 3. TRANG MIX STUDIO AI */}
+          <Route
+            path="/studio"
+            element={
+              <StudioPage
+                onRequireAuth={(target = '/studio') => handleOpenAuth(target)}
+                onBackToCatalog={() => navigate('/catalog')}
+              />
+            }
           />
-        )}
 
-        {/* 4. TRANG CÁ NHÂN & TỦ ĐỒ LOOKBOOK */}
-        {activeTab === 'profile' && (
-          <ProfilePage
-            onNavigateToStudio={handleOpenStudio}
-            onNavigateToCatalog={() => {
-              setActiveTab('catalog');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+          {/* 4. TRANG CÁ NHÂN & TỦ ĐỒ LOOKBOOK */}
+          <Route
+            path="/profile"
+            element={
+              <ProfilePage
+                onNavigateToStudio={() => handleOpenStudio('/studio')}
+                onNavigateToCatalog={() => navigate('/catalog')}
+              />
+            }
           />
-        )}
+
+          {/* Fallback route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
 
       {/* Editorial Footer */}
@@ -179,8 +186,9 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={() => {
           setIsAuthModalOpen(false);
-          setActiveTab('studio');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (redirectPathAfterAuth) {
+            navigate(redirectPathAfterAuth);
+          }
         }}
       />
     </div>
