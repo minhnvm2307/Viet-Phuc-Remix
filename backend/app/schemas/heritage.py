@@ -72,3 +72,42 @@ class CatalogResponse(BaseModel):
     costumes: List[CostumeItem]
     eras: List[EraTaxonomy]
     categories: List[CategoryTaxonomy]
+
+
+class GuardrailResult(BaseModel):
+    """Kết quả kiểm định văn hóa cho một mô tả phối đồ tự do."""
+    verdict: str = "OK"  # OK | CAUTION | BLOCK
+    curator_feedback: str = ""
+    source: str = "RULE"  # RULE | AI | FALLBACK_OPEN
+
+
+class ContextAdvisorRequest(BaseModel):
+    occasion: Optional[str] = None
+    weather: Optional[str] = None
+    vibe: Optional[str] = None
+    free_text: Optional[str] = None
+
+
+class ContextRecommendation(BaseModel):
+    costume_id: str
+    reason: str = ""
+    accessory_ids: List[str] = Field(default_factory=list)
+
+
+class ContextAdvisorResponse(BaseModel):
+    curator_intro: str = ""
+    recommendations: List[ContextRecommendation] = Field(default_factory=list)
+    generation_mode: str = "LIVE"  # LIVE | FALLBACK
+
+
+class TrendExtractRequest(BaseModel):
+    source_url: str
+
+
+class TrendExtractResponse(BaseModel):
+    status: str  # ok | failed | unavailable
+    thumbnail_url: Optional[str] = None
+    matched_costume_id: Optional[str] = None
+    adaptation_reason: str = ""
+    detected_elements: Dict[str, str] = Field(default_factory=dict)
+    reason: Optional[str] = None
