@@ -3182,35 +3182,45 @@ nav button.active {
   margin: 0;
 }
 
-/* Trang Gợi Ý Theo Bối Cảnh (/advisor) */
-.advisor-page-header {
-  max-width: 680px;
-  margin: 0 auto 32px;
-  text-align: center;
+/* Trang Gợi Ý Theo Bối Cảnh (/advisor) — dùng lại ngôn ngữ hero/pillars của trang chủ */
+.advisor-page-container {
+  width: 100%;
+  min-height: 100vh;
+  padding-top: 100px;
+  background-color: var(--color-background);
 }
 
-.advisor-page-title {
-  font-family: var(--font-serif);
-  font-size: 36px;
-  font-weight: 600;
-  color: var(--text-main);
-  margin: 0 0 8px;
+.advisor-hero-section {
+  padding-bottom: 24px;
 }
 
-.advisor-page-subtitle {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin: 0;
+.advisor-hero-title {
+  font-size: clamp(32px, 5vw, 52px);
+}
+
+.advisor-pillars-section {
+  padding: 56px 4vw;
+}
+
+.advisor-workspace {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 56px 32px 80px;
 }
 
 .advisor-page-body {
-  max-width: 680px;
-  margin: 0 auto;
   background: #FFFFFF;
   border-radius: 16px;
   border: 1px solid var(--border-line);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  padding: 28px 32px;
+  padding: 36px 40px;
+}
+
+.advisor-form-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 .advisor-form {
@@ -3310,16 +3320,16 @@ nav button.active {
 
 .advisor-recommend-card {
   display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 16px;
+  grid-template-columns: 160px 1fr;
+  gap: 24px;
   border: 1px solid var(--border-line);
   border-radius: 12px;
-  padding: 14px;
+  padding: 20px;
 }
 
 .advisor-card-img {
-  width: 96px;
-  height: 96px;
+  width: 160px;
+  height: 160px;
   border-radius: 8px;
   overflow: hidden;
   background: #F7F4EE;
@@ -3389,8 +3399,7 @@ nav button.active {
 .advisor-tab-bar {
   display: flex;
   gap: 8px;
-  max-width: 680px;
-  margin: 0 auto 20px;
+  margin: 0 0 20px;
 }
 
 /* Ô tải ảnh chụp màn hình dự phòng khi link trend không trích xuất được */

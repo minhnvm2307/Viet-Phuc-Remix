@@ -96,7 +96,10 @@ export default function App() {
           />
 
           {/* 4. TRANG GỢI Ý THEO BỐI CẢNH */}
-          <Route path="/advisor" element={<AdvisorPage />} />
+          <Route
+            path="/advisor"
+            element={<AdvisorPage onRequireAuth={(target = '/advisor') => handleOpenAuth(target)} />}
+          />
 
           {/* 5. TRANG CÁ NHÂN & TỦ ĐỒ LOOKBOOK */}
           <Route

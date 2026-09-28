@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CuratorGuardrailNote from '../components/CuratorGuardrailNote';
 
@@ -91,8 +91,12 @@ export default function StudioPage({
 }) {
   const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const costumeQueryId = searchParams.get('costume');
+  // Ảnh nguồn được truyền từ trang /advisor (vd trích xuất từ trend) — nếu có,
+  // ưu tiên dùng ảnh này làm ảnh ghép thay vì ảnh mặc định trong gallery di sản.
+  const incomingSourceImage = location.state?.sourceImageDataUrl || null;
 
   // Khôi phục bản nháp ban đầu
   const initialDraft = React.useMemo(() => loadSavedDraft(), []);
@@ -132,10 +136,32 @@ export default function StudioPage({
   // Kiểm định văn hóa (Cultural Guardrail)
   const [guardrail, setGuardrail] = useState(null);
 
-  // Danh sách ảnh trong Gallery của trang phục được chọn (Ảnh phục dựng nguyên gốc để làm ảnh nền ghép)
-  const costumeGallery = (selectedCostume?.gallery && selectedCostume.gallery.length > 0)
-    ? selectedCostume.gallery
-    : [selectedCostume?.cover_image].filter(Boolean);
+  // Tủ ảnh nguồn cá nhân đã lưu (vd từ trang Trend) — dùng lại làm ảnh ghép
+  const [savedSourceImages, setSavedSourceImages] = useState([]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setSavedSourceImages([]);
+      return;
+    }
+    fetch('/api/source-images/my', { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setSavedSourceImages(Array.isArray(data) ? data : []))
+      .catch((err) => console.error('Lỗi tải tủ ảnh đã lưu:', err));
+  }, [isAuthenticated, token]);
+
+  // Danh sách ảnh trong Gallery của trang phục được chọn: ảnh nguồn truyền từ Advisor
+  // (nếu có) + ảnh đã lưu khớp trang phục này + ảnh phục dựng gốc trong catalog.
+  const costumeGallery = React.useMemo(() => {
+    const base = (selectedCostume?.gallery && selectedCostume.gallery.length > 0)
+      ? selectedCostume.gallery
+      : [selectedCostume?.cover_image].filter(Boolean);
+    const savedForCostume = savedSourceImages
+      .filter((img) => img.costume_id === selectedCostume?.id)
+      .map((img) => img.image_data);
+    const combined = [incomingSourceImage, ...savedForCostume, ...base].filter(Boolean);
+    return [...new Set(combined)];
+  }, [selectedCostume, savedSourceImages, incomingSourceImage]);
 
   // Khi thay đổi ảnh user, reset output (phải bấm Tạo Ảnh mới render lại)
   useEffect(() => {
@@ -165,11 +191,13 @@ export default function StudioPage({
           }
           setSelectedCostume(target);
 
-          // Khôi phục ảnh gallery nền
+          // Khôi phục ảnh gallery nền — ưu tiên ảnh nguồn truyền từ Advisor (nếu có)
           const gallery = (target?.gallery && target.gallery.length > 0)
             ? target.gallery
             : [target?.cover_image].filter(Boolean);
-          if (initialDraft?.selectedCostumeImage && gallery.includes(initialDraft.selectedCostumeImage)) {
+          if (incomingSourceImage) {
+            setSelectedCostumeImage(incomingSourceImage);
+          } else if (initialDraft?.selectedCostumeImage && gallery.includes(initialDraft.selectedCostumeImage)) {
             setSelectedCostumeImage(initialDraft.selectedCostumeImage);
           } else if (gallery.length > 0) {
             setSelectedCostumeImage(gallery[0]);
