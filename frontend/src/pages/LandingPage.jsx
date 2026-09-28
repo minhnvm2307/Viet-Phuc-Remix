@@ -148,14 +148,14 @@ export default function LandingPage({ onStartStudio }) {
             <button
               type="button"
               className="landing-btn-primary"
-              onClick={onStartStudio}
+              onClick={handleStartMix}
             >
               THỬ PHỐI ĐỒ NGAY
             </button>
             <button
               type="button"
               className="landing-btn-outline"
-              onClick={onExploreCatalog}
+              onClick={() => navigate('/catalog')}
             >
               TÌM HIỂU CỔ PHỤC
             </button>

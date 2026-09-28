@@ -13,7 +13,9 @@ import { ShieldCheck } from 'lucide-react';
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    try {
+      window.scrollTo(0, 0);
+    } catch (e) {}
   }, [pathname]);
   return null;
 }
