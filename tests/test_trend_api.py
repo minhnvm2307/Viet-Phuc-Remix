@@ -34,6 +34,9 @@ class TestTrendExtractEndpoint(unittest.TestCase):
         data = response.json()
         self.assertEqual(data["status"], "ok")
         self.assertEqual(data["matched_costume_id"], "ao-tu-than")
+        # phải trả về base64 data URL của chính ảnh đã tải, không chỉ link CDN gốc
+        # (link CDN TikTok/Facebook thường có chữ ký hết hạn, không dùng lại được)
+        self.assertTrue(data["image_data_url"].startswith("data:image/jpeg;base64,"))
 
     @patch("app.routers.heritage.link_extractor.download_thumbnail")
     @patch("app.routers.heritage.link_extractor.extract_from_url")
@@ -90,7 +93,9 @@ class TestTrendExtractEndpoint(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["matched_costume_id"], "ao-nhat-binh")
+        data = response.json()
+        self.assertEqual(data["matched_costume_id"], "ao-nhat-binh")
+        self.assertTrue(data["image_data_url"].startswith("data:image/jpeg;base64,"))
 
     def test_trend_extract_upload_rejects_non_image_file(self):
         fake_file = io.BytesIO(b"not an image")

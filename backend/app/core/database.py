@@ -28,4 +28,5 @@ def init_db():
     """Khởi tạo toàn bộ các bảng trong database nếu chưa có."""
     from backend.app.models.user import User
     from backend.app.models.lookbook import Lookbook
+    from backend.app.models.source_image import SourceImage
     Base.metadata.create_all(bind=engine)

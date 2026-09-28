@@ -2,6 +2,7 @@
 heritage.py - Router quản lý danh mục và thông tin di sản phục trang
 """
 
+import base64
 import json
 from typing import List, Optional, Dict, Any
 from pathlib import Path
@@ -274,6 +275,11 @@ def context_advisor(req: ContextAdvisorRequest):
     return ContextAdvisorResponse(**result)
 
 
+def _to_data_url(image_bytes: bytes, mime_type: str) -> str:
+    """Base64 hóa ảnh thành data URL — tránh phụ thuộc link CDN có thể hết hạn."""
+    return f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode('ascii')}"
+
+
 _IMAGE_MAGIC_BYTES = (
     b"\xff\xd8\xff",  # JPEG
     b"\x89PNG\r\n\x1a\n",  # PNG
@@ -314,6 +320,7 @@ def trend_extract(req: TrendExtractRequest):
     return TrendExtractResponse(
         status="ok",
         thumbnail_url=extraction["thumbnail_url"],
+        image_data_url=_to_data_url(image_bytes, mime_type),
         matched_costume_id=analysis["matched_costume_id"],
         adaptation_reason=analysis["adaptation_reason"],
         detected_elements=analysis["detected_elements"],
@@ -351,6 +358,7 @@ def trend_extract_upload(screenshot: UploadFile = File(...)):
 
     return TrendExtractResponse(
         status="ok",
+        image_data_url=_to_data_url(image_bytes, screenshot.content_type),
         matched_costume_id=analysis["matched_costume_id"],
         adaptation_reason=analysis["adaptation_reason"],
         detected_elements=analysis["detected_elements"],

@@ -107,6 +107,7 @@ class TrendExtractRequest(BaseModel):
 class TrendExtractResponse(BaseModel):
     status: str  # ok | failed | unavailable
     thumbnail_url: Optional[str] = None
+    image_data_url: Optional[str] = None  # base64 data URL của chính ảnh đã tải/upload
     matched_costume_id: Optional[str] = None
     adaptation_reason: str = ""
     detected_elements: Dict[str, str] = Field(default_factory=dict)

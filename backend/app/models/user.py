@@ -17,3 +17,5 @@ class User(Base):
 
     # Quan hệ 1-N với lookbooks
     lookbooks = relationship("Lookbook", back_populates="user", cascade="all, delete-orphan")
+    # Quan hệ 1-N với ảnh nguồn đã lưu (trend, v.v.)
+    source_images = relationship("SourceImage", back_populates="user", cascade="all, delete-orphan")
