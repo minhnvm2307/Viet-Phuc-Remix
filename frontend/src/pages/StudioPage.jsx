@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import CuratorGuardrailNote from '../components/CuratorGuardrailNote';
 
 // Khóa lưu bản nháp Studio trong localStorage
 const DRAFT_KEY = 'vietphuc_studio_draft';
@@ -89,6 +90,7 @@ export default function StudioPage({
   onRequireAuth
 }) {
   const { isAuthenticated, token } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const costumeQueryId = searchParams.get('costume');
 
@@ -119,6 +121,16 @@ export default function StudioPage({
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGeneratedOnce, setHasGeneratedOnce] = useState(false);
   const [activeProposalIndex, setActiveProposalIndex] = useState(0);
+
+  // Trạng thái tiến trình tạo ảnh (Dynamic Progress Steps) & Floating Modal
+  const [loadingStageText, setLoadingStageText] = useState('1. Đang khởi tạo template phối đồ...');
+  const [loadingProgressPercent, setLoadingProgressPercent] = useState(15);
+  const [zoomedImage, setZoomedImage] = useState(null);
+  const [refinePrompt, setRefinePrompt] = useState('');
+  const [generatedResults, setGeneratedResults] = useState(null);
+
+  // Kiểm định văn hóa (Cultural Guardrail)
+  const [guardrail, setGuardrail] = useState(null);
 
   // Danh sách ảnh trong Gallery của trang phục được chọn (Ảnh phục dựng nguyên gốc để làm ảnh nền ghép)
   const costumeGallery = (selectedCostume?.gallery && selectedCostume.gallery.length > 0)
@@ -226,6 +238,7 @@ export default function StudioPage({
     setHasGeneratedOnce(false);
     setIsGenerating(false);
     setActiveProposalIndex(0);
+    setGuardrail(null);
 
     // Cập nhật URL Query Param
     setSearchParams({ costume: costume.id }, { replace: true });
@@ -251,6 +264,7 @@ export default function StudioPage({
     setHasGeneratedOnce(false);
     setIsGenerating(false);
     setActiveProposalIndex(0);
+    setGuardrail(null);
   };
 
   // Xử lý file ảnh tải lên
@@ -292,8 +306,23 @@ export default function StudioPage({
     });
   };
 
-  // Xử lý submit prompt tạo phối đồ AI
-  const handlePromptSubmit = (e) => {
+  // Danh sách các phụ kiện hiện đang được pick (tối đa 3 món: 1 Mũ/Nón, 1 Kiểu Tóc, 1 Trang Sức)
+  const selectedAccList = Object.values(selectedAccessories);
+
+  // Tải ảnh về máy người dùng
+  const handleDownloadImage = (url) => {
+    if (!url) return;
+    const link = document.createElement('a');
+    link.href = url;
+    const costumeSlug = (selectedCostume?.name || 'VietPhucRemix').replace(/\s+/g, '_');
+    link.download = `VietPhucRemix_${costumeSlug}_${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Xử lý submit prompt tạo phối đồ AI với tiến trình trực quan
+  const handlePromptSubmit = async (e, promptOverride = null) => {
     e?.preventDefault();
 
     // 1. Kiểm tra đăng nhập (chỉ người dùng có tài khoản mới được tạo ảnh và lưu lookbook)
@@ -302,52 +331,99 @@ export default function StudioPage({
       return;
     }
 
-    const currentPrompt = mixPrompt.trim() || 'Phối trang phục cổ phục cùng phong cách hiện đại';
-    if (!mixPrompt.trim()) {
+    const currentPrompt = (promptOverride !== null ? promptOverride : mixPrompt).trim() || 'Phối trang phục cổ phục cùng phong cách hiện đại';
+    if (!mixPrompt.trim() || promptOverride !== null) {
       setMixPrompt(currentPrompt);
     }
+
     setIsGenerating(true);
     setSaveSuccessMsg('');
+    setGuardrail(null);
+    setLoadingProgressPercent(15);
+    setLoadingStageText(`1. Đang khảo sát phom dáng ${selectedCostume?.name || 'cổ phục'}...`);
 
-    setTimeout(() => {
-      setIsGenerating(false);
-      setHasGeneratedOnce(true);
-
-      // Tự động lưu bản phối vào Lookbook cá nhân của user trên backend
-      const outputs = getAiOutputs();
-      const chosenImage = outputs[activeProposalIndex] || outputs[0];
-
-      if (token) {
-        fetch('/api/lookbooks', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            costume_id: selectedCostume?.id || 'heritage-mix',
-            costume_name: selectedCostume?.name || 'Cổ Phục Remix',
-            accessories_json: JSON.stringify(
-              selectedAccList.map((a) => ({ id: a.id, name: a.name, category: a.category }))
-            ),
-            prompt: currentPrompt,
-            result_image_url: chosenImage,
-            user_photo_url: userPhoto || null
-          })
+    try {
+      // Gọi API bảo mật trên backend để xây dựng prompt template và lấy các bước tiến trình
+      const res = await fetch('/api/heritage/remix-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          costume_id: selectedCostume?.id || 'ao-nhat-binh',
+          selected_image_url: activeCostumeMixImage,
+          color: selectedColor,
+          accessories: selectedAccList.map((a) => ({ id: a.id, name: a.name, category: a.category })),
+          user_prompt: currentPrompt,
+          has_user_photo: !!userPhoto
         })
-          .then((res) => {
-            if (res.ok) {
-              setSaveSuccessMsg('Đã tự động lưu bản phối vào Tủ đồ cá nhân của bạn!');
-              setTimeout(() => setSaveSuccessMsg(''), 4000);
-            }
-          })
-          .catch((err) => console.error('Lỗi lưu lookbook:', err));
-      }
-    }, 1800);
-  };
+      });
 
-  // Danh sách các phụ kiện hiện đang được pick (tối đa 3 món: 1 Mũ/Nón, 1 Kiểu Tóc, 1 Trang Sức)
-  const selectedAccList = Object.values(selectedAccessories);
+      const data = await res.json();
+      setGuardrail(data.guardrail || null);
+
+      // Kiểm định văn hóa chặn tạo ảnh: dừng lại, chỉ hiển thị ghi chú giám tuyển
+      if (data.guardrail?.verdict === 'BLOCK') {
+        setIsGenerating(false);
+        return;
+      }
+
+      const steps = data.stage_steps || [
+        `1. Đang phân tích phom dáng ${selectedCostume?.name || 'cổ phục'}...`,
+        '2. Cố định quy chuẩn vạt hữu & dựng phom vạt áo...',
+        `3. Nhuộm sắc độ ${selectedColor.name} & kết nối phụ kiện...`,
+        '4. Áp dụng phong cách thời trang đương đại...',
+        '5. Tinh chỉnh ánh sáng studio & kết xuất 2 bản phối chuẩn 8K...'
+      ];
+
+      // Diễn hoạt các bước tiến trình tạo ảnh trực quan (2.6s)
+      const stepDurations = [350, 850, 1450, 2050, 2600];
+      const percents = [25, 45, 68, 88, 100];
+
+      stepDurations.forEach((delay, idx) => {
+        setTimeout(() => {
+          if (steps[idx]) setLoadingStageText(steps[idx]);
+          setLoadingProgressPercent(percents[idx]);
+        }, delay);
+      });
+
+      setTimeout(() => {
+        const finalOutputs = data.output_images && data.output_images.length > 0 ? data.output_images : getAiOutputs();
+        setGeneratedResults(finalOutputs);
+        setIsGenerating(false);
+        setHasGeneratedOnce(true);
+
+        const chosenImage = finalOutputs[activeProposalIndex] || finalOutputs[0];
+        if (token) {
+          fetch('/api/lookbooks', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              costume_id: selectedCostume?.id || 'heritage-mix',
+              costume_name: selectedCostume?.name || 'Cổ Phục Remix',
+              accessories_json: JSON.stringify(
+                selectedAccList.map((a) => ({ id: a.id, name: a.name, category: a.category }))
+              ),
+              prompt: currentPrompt,
+              result_image_url: chosenImage,
+              user_photo_url: userPhoto || null
+            })
+          })
+            .then((res) => {
+              if (res.ok) {
+                setSaveSuccessMsg('Đã tự động lưu bản phối vào Tủ đồ cá nhân của bạn!');
+                setTimeout(() => setSaveSuccessMsg(''), 4500);
+              }
+            })
+            .catch((err) => console.error('Lỗi lưu lookbook:', err));
+        }
+      }, 3000);
+    } catch (err) {
+      console.error('Lỗi tạo ảnh phối đồ:', err);
+      setIsGenerating(false);
+    }
+  };
 
   // 2 Ô OUTPUT SAU KHI DÙNG AI MIX ĐỒ (Chỉ xuất hiện sau khi submit nút Tạo Ảnh)
   const getAiOutputs = () => {
@@ -392,7 +468,7 @@ export default function StudioPage({
       selectedCostume?.remix_image || selectedCostume?.cover_image || '/static/seeds/images/ao-giao-linh-remix.jpg'
     ];
   };
-  const aiOutputImages = getAiOutputs();
+  const aiOutputImages = generatedResults || getAiOutputs();
 
   // Lọc phụ kiện theo tab đang chọn (chỉ trong danh sách đã khớp triều đại)
   const filteredAccessories = matchedAccessories.filter((a) => a.category === activeAccTab);
@@ -411,19 +487,28 @@ export default function StudioPage({
       <div className="studio-costume-bar" style={{ marginTop: '10px' }}>
         <div className="bar-header-row">
           <button onClick={onBackToCatalog} className="btn-back-link" title="Quay lại danh mục cổ phục">
-            QUAY LẠI
+            <i className="fa-solid fa-arrow-left"></i>
           </button>
           <span className="bar-label">TRANG PHỤC NỀN:</span>
           <span className="costume-count-badge">({costumes.length} mẫu di sản)</span>
-          <button
-            type="button"
-            onClick={handleResetDraft}
-            className="btn-back-link"
-            style={{ marginLeft: 'auto', background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
-            title="Xóa dữ liệu nháp đang phối và làm mới"
-          >
-            ĐẶT LẠI BẢN PHỐI
-          </button>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => navigate('/advisor')}
+              className="advisor-trigger-btn"
+            >
+              Gợi ý theo bối cảnh
+            </button>
+            <button
+              type="button"
+              onClick={handleResetDraft}
+              className="btn-back-link"
+              style={{ background: 'transparent', borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+              title="Xóa dữ liệu nháp đang phối và làm mới"
+            >
+              <i className="fa-solid fa-rotate-left"></i>
+            </button>
+          </div>
         </div>
 
         {/* Danh sách trang phục nền đầy đủ cả 16 mẫu */}
@@ -474,15 +559,17 @@ export default function StudioPage({
                       type="button"
                       className="btn-change-photo"
                       onClick={() => fileInputRef.current?.click()}
+                      title="Đổi ảnh"
                     >
-                      ĐỔI ẢNH
+                      <i className="fa-solid fa-arrows-rotate"></i>
                     </button>
                     <button
                       type="button"
                       className="btn-remove-photo"
                       onClick={() => setUserPhoto(null)}
+                      title="Xóa ảnh"
                     >
-                      XÓA
+                      <i className="fa-solid fa-trash-can"></i>
                     </button>
                   </div>
                 </div>
@@ -513,7 +600,9 @@ export default function StudioPage({
 
             {/* HUY HIỆU MIX ĐỒ Ở GIỮA */}
             <div className="mix-transfer-indicator">
-              <span className="indicator-label">MIX ĐỒ</span>
+              <span className="indicator-label" title="Phối đồ di sản">
+                <i className="fa-solid fa-wand-magic-sparkles"></i>
+              </span>
             </div>
 
             {/* NỬA PHẢI: ẢNH ĐỂ GHÉP (ẢNH ĐẦU TIÊN TRONG GALLERY, CÓ THỂ PICK CHỌN) */}
@@ -643,7 +732,7 @@ export default function StudioPage({
                 className="prompt-input"
                 value={mixPrompt}
                 onChange={(e) => setMixPrompt(e.target.value)}
-                placeholder="Nhập mô tả của bạn"
+                placeholder="Mô tả chỉnh sửa"
               />
 
               <div className="model-badge">GEMINI</div>
@@ -652,8 +741,13 @@ export default function StudioPage({
                 type="submit"
                 className="prompt-submit-btn"
                 disabled={isGenerating}
+                title="Tạo ảnh"
               >
-                {isGenerating ? 'ĐANG TẠO...' : 'TẠO ẢNH'}
+                {isGenerating ? (
+                  <i className="fa-solid fa-spinner fa-spin"></i>
+                ) : (
+                  <i className="fa-solid fa-wand-magic-sparkles"></i>
+                )}
               </button>
             </form>
 
@@ -663,9 +757,11 @@ export default function StudioPage({
                 <span>{saveSuccessMsg}</span>
               </div>
             )}
+
+            <CuratorGuardrailNote guardrail={guardrail} />
           </div>
 
-          {/* KHỐI 3: ĐÚNG 2 Ô OUTPUT (CHỈ XUẤT HIỆN KHI SUBMIT, KHÔNG CÓ TIÊU ĐỀ / MÔ TẢ TRÊN ẢNH) */}
+          {/* KHỐI 3: ĐÚNG 2 Ô OUTPUT (CHỈ XUẤT HIỆN KHI SUBMIT, TRỌN VẸN PHOM DÁNG KHÔNG MẤT GÓC, BẤM VÀO ĐỂ PHÓNG TO & CHỈNH SỬA) */}
           {(isGenerating || hasGeneratedOnce) && (
             <div className="nano-output-section">
               <div className="nano-output-grid-two">
@@ -676,20 +772,43 @@ export default function StudioPage({
                       key={idx}
                       className={`nano-card-two ${isSelected && hasGeneratedOnce ? 'active' : ''}`}
                       onClick={() => {
-                        if (hasGeneratedOnce) setActiveProposalIndex(idx);
+                        if (hasGeneratedOnce && !isGenerating) {
+                          setActiveProposalIndex(idx);
+                          setZoomedImage(imgUrl);
+                        }
                       }}
+                      title={hasGeneratedOnce ? 'Bấm để xem phóng to, tải về hoặc chỉnh sửa' : ''}
                     >
                       {isGenerating ? (
-                        /* HIỆU ỨNG LOADING MỜ MỜ NHƯ WATER KIỂU NANO BANANA CỦA GEMINI */
+                        /* HIỆU ỨNG LOADING MỜ MỜ NHƯ WATER KIỂU NANO BANANA CỦA GEMINI CÙNG TIẾN TRÌNH TẠO ẢNH */
                         <div className="nano-water-loader">
                           <div className="water-wave-layer" />
                           <div className="water-wave-layer secondary" />
                           <div className="water-shimmer-glow" />
+
+                          <div className="nano-loader-progress-box">
+                            <div className="loader-badge-tag">
+                              <span className="loader-pulse-dot" />
+                              <span>Tiến trình AI Phối Đồ</span>
+                            </div>
+                            <div className="loader-step-text">
+                              {loadingStageText}
+                            </div>
+                            <div className="loader-progress-track">
+                              <div
+                                className="loader-progress-fill"
+                                style={{ width: `${loadingProgressPercent}%` }}
+                              />
+                            </div>
+                          </div>
                         </div>
                       ) : (
-                        /* CHỈ HIỂN THỊ ẢNH THUẦN TÚY, TUYỆT ĐỐI KHÔNG CÓ TITLE HAY MÔ TẢ TRÊN ẢNH */
+                        /* CHỈ HIỂN THỊ ẢNH THUẦN TÚY TRỌN VẸN, KHÔNG BỊ CẮT XÉN GÓC ẢNH */
                         <div className="nano-pure-img-wrapper">
-                          <img src={imgUrl} alt="" />
+                          <img src={imgUrl} alt="Bản phối Việt Phục Remix" />
+                          <div className="nano-card-hover-hint" title="Xem chi tiết &amp; chỉnh sửa">
+                            <i className="fa-solid fa-expand"></i>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -814,6 +933,80 @@ export default function StudioPage({
           </div>
         </div>
       </div>
+
+      {/* FLOATING CARD MODAL: PHÓNG TO / TẢI VỀ / CHỈNH SỬA THÊM */}
+      {zoomedImage && (
+        <div className="floating-preview-backdrop" onClick={() => setZoomedImage(null)}>
+          <div className="floating-preview-card" onClick={(e) => e.stopPropagation()}>
+            {/* Header Modal */}
+            <div className="floating-preview-header">
+              <div>
+                <h3 className="floating-preview-title">{selectedCostume?.name || 'Bản Phối Cổ Phục Remix'}</h3>
+                <div className="floating-preview-meta">
+                  Sắc độ: {selectedColor?.name} • {selectedAccList.length} món phụ kiện phối kèm
+                </div>
+              </div>
+              <button
+                type="button"
+                className="floating-preview-close-btn"
+                onClick={() => setZoomedImage(null)}
+                title="Đóng cửa sổ"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            {/* Ảnh Full View Trọn Vẹn Không Bị Cắt Xén */}
+            <div className="floating-preview-body">
+              <div className="floating-preview-img-box">
+                <img src={zoomedImage} alt={selectedCostume?.name || 'Việt Phục Remix'} />
+              </div>
+            </div>
+
+            {/* Footer Toolbar: Tải về + Gõ thêm mô tả chỉnh sửa */}
+            <div className="floating-preview-footer">
+              <div className="floating-actions-row">
+                <button
+                  type="button"
+                  className="floating-download-btn"
+                  onClick={() => handleDownloadImage(zoomedImage)}
+                  title="Tải ảnh về máy"
+                >
+                  <i className="fa-solid fa-download"></i>
+                </button>
+
+                <form
+                  className="floating-refine-form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!refinePrompt.trim()) return;
+                    const updatedPrompt = `${mixPrompt ? mixPrompt + ' • ' : ''}Chỉnh sửa thêm: ${refinePrompt.trim()}`;
+                    setZoomedImage(null);
+                    setRefinePrompt('');
+                    handlePromptSubmit(null, updatedPrompt);
+                  }}
+                >
+                  <input
+                    type="text"
+                    className="floating-refine-input"
+                    value={refinePrompt}
+                    onChange={(e) => setRefinePrompt(e.target.value)}
+                    placeholder="Mô tả chỉnh sửa"
+                  />
+                  <button
+                    type="submit"
+                    className="floating-refine-btn"
+                    disabled={!refinePrompt.trim()}
+                    title="Tạo lại với chỉnh sửa"
+                  >
+                    <i className="fa-solid fa-wand-magic-sparkles"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

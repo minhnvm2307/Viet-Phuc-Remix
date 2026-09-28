@@ -4,6 +4,7 @@ import Header from './components/Header';
 import LandingPage from './pages/LandingPage';
 import HeritageCatalog from './pages/HeritageCatalog';
 import StudioPage from './pages/StudioPage';
+import AdvisorPage from './pages/AdvisorPage';
 import ProfilePage from './pages/ProfilePage';
 import AuthModal from './components/AuthModal';
 import { useAuth } from './context/AuthContext';
@@ -94,7 +95,10 @@ export default function App() {
             }
           />
 
-          {/* 4. TRANG CÁ NHÂN & TỦ ĐỒ LOOKBOOK */}
+          {/* 4. TRANG GỢI Ý THEO BỐI CẢNH */}
+          <Route path="/advisor" element={<AdvisorPage />} />
+
+          {/* 5. TRANG CÁ NHÂN & TỦ ĐỒ LOOKBOOK */}
           <Route
             path="/profile"
             element={

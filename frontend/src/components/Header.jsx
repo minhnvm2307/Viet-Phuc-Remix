@@ -48,6 +48,14 @@ export default function Header({ onOpenAuth }) {
 
         <button
           type="button"
+          onClick={() => navigate('/advisor')}
+          className={`header-nav-btn ${location.pathname === '/advisor' ? 'active' : ''}`}
+        >
+          Gợi Ý Bối Cảnh
+        </button>
+
+        <button
+          type="button"
           onClick={handleNavigateStudio}
           className={`header-nav-btn ${location.pathname === '/studio' ? 'active' : ''}`}
         >
