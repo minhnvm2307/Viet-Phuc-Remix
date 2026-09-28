@@ -3,13 +3,48 @@ heritage.py - Router quản lý danh mục và thông tin di sản phục trang
 """
 
 import json
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pathlib import Path
-from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File
+import requests
 from app.core.config import settings
-from app.schemas.heritage import CostumeItem, TaxonomyData, CatalogResponse
+from app.schemas.heritage import (
+    CostumeItem,
+    TaxonomyData,
+    CatalogResponse,
+    GuardrailResult,
+    ContextAdvisorRequest,
+    ContextAdvisorResponse,
+    TrendExtractRequest,
+    TrendExtractResponse,
+)
+from app.services.prompt_template import (
+    build_secure_remix_prompt,
+    generate_stage_steps,
+    get_costume_output_images
+)
+from app.services.cultural_guardrail import check_remix_request
+from app.services.curator_advisor import get_context_recommendations
+from app.services import link_extractor, trend_adapter
 
 router = APIRouter(prefix="/heritage", tags=["Heritage Catalog"])
+
+class RemixGenerateRequest(BaseModel):
+    costume_id: str
+    selected_image_url: Optional[str] = None
+    color: Optional[Dict[str, Any]] = None
+    accessories: Optional[List[Dict[str, Any]]] = None
+    user_prompt: Optional[str] = None
+    has_user_photo: Optional[bool] = False
+
+class RemixGenerateResponse(BaseModel):
+    success: bool
+    costume_name: str
+    stage_steps: List[str]
+    output_images: List[str]
+    guardrail: GuardrailResult = GuardrailResult()
+
 
 
 def load_catalog_data() -> dict:
@@ -146,4 +181,152 @@ def get_accessories(
         "categories": data.get("categories", []),
         "dynasties": data.get("dynasties", [])
     }
+
+
+@router.post("/remix-generate", response_model=RemixGenerateResponse)
+def generate_remix(req: RemixGenerateRequest):
+    """
+    Sinh tiến trình phối đồ và trả về kết quả 2 ảnh phối AI.
+    Master prompt được sinh và bảo vệ tuyệt đối trên server, không bị lộ ra client.
+
+    Trước khi sinh ảnh, mô tả tự do của người dùng được kiểm định văn hóa
+    (rule-based + AI) qua cultural_guardrail.check_remix_request. Nếu bị "BLOCK",
+    không sinh ảnh và chỉ trả về ghi chú giám tuyển giải thích lý do.
+    """
+    data = load_catalog_data()
+    costumes = data.get("costumes", [])
+    costume = next((c for c in costumes if c.get("id") == req.costume_id), None)
+    if not costume:
+        costume = {
+            "id": req.costume_id,
+            "name": "Cổ Phục Việt Nam",
+            "era_origin": "Di sản Đại Việt",
+            "collar_type": "Cổ truyền thống",
+            "sleeve_type": "Tay áo truyền thống"
+        }
+
+    guardrail_result = check_remix_request(costume=costume, user_prompt=req.user_prompt)
+    guardrail = GuardrailResult(**guardrail_result)
+
+    if guardrail.verdict == "BLOCK":
+        return RemixGenerateResponse(
+            success=False,
+            costume_name=costume.get("name", "Cổ phục Việt Nam"),
+            stage_steps=[],
+            output_images=[],
+            guardrail=guardrail,
+        )
+
+    # Xây dựng Master Prompt bí mật (chỉ truyền vào AI model / log bảo mật)
+    _master_prompt = build_secure_remix_prompt(
+        costume=costume,
+        selected_image_url=req.selected_image_url,
+        color=req.color,
+        accessories=req.accessories,
+        user_prompt=req.user_prompt,
+        has_user_photo=req.has_user_photo or False
+    )
+
+    # Sinh các bước tiến trình tạo ảnh hiển thị cho người dùng
+    stage_steps = generate_stage_steps(
+        costume=costume,
+        color=req.color,
+        accessories=req.accessories,
+        user_prompt=req.user_prompt,
+        has_user_photo=req.has_user_photo or False
+    )
+
+    # 2 ảnh phối AI sắc nét cho trang phục này
+    output_images = get_costume_output_images(costume.get("id", ""))
+
+    return RemixGenerateResponse(
+        success=True,
+        costume_name=costume.get("name", "Cổ phục Việt Nam"),
+        stage_steps=stage_steps,
+        output_images=output_images,
+        guardrail=guardrail,
+    )
+
+
+@router.post("/context-advisor", response_model=ContextAdvisorResponse)
+def context_advisor(req: ContextAdvisorRequest):
+    """
+    Gợi ý phối đồ theo bối cảnh (sự kiện, thời tiết, phong cách, mô tả tự do).
+    Ưu tiên Gemini; tự động rơi về so khớp quy tắc nếu API không khả dụng.
+    """
+    data = load_catalog_data()
+    costumes = data.get("costumes", [])
+
+    accessories: List[Dict[str, Any]] = []
+    accessories_path = settings.STATIC_DIR / "seeds" / "accessories_catalog.json"
+    if accessories_path.exists():
+        with open(accessories_path, "r", encoding="utf-8") as f:
+            accessories = json.load(f).get("items", [])
+
+    result = get_context_recommendations(
+        occasion=req.occasion,
+        weather=req.weather,
+        vibe=req.vibe,
+        free_text=req.free_text,
+        costumes=costumes,
+        accessories=accessories,
+    )
+    return ContextAdvisorResponse(**result)
+
+
+@router.post("/trend-extract", response_model=TrendExtractResponse)
+def trend_extract(req: TrendExtractRequest):
+    """
+    Trích xuất trend từ 1 link TikTok/Facebook cụ thể và ánh xạ sang 1 trang phục
+    có thật trong catalog bằng Gemini vision. Không lưu DB, không yêu cầu đăng nhập.
+    """
+    extraction = link_extractor.extract_from_url(req.source_url)
+    if extraction.get("status") != "ok":
+        return TrendExtractResponse(status="failed", reason=extraction.get("reason"))
+
+    try:
+        image_bytes, mime_type = link_extractor.download_thumbnail(extraction["thumbnail_url"])
+    except requests.RequestException:
+        return TrendExtractResponse(status="failed", reason="thumbnail_download_failed")
+
+    costumes = load_catalog_data().get("costumes", [])
+    analysis = trend_adapter.analyze_trend_image(
+        image_bytes, mime_type, extraction.get("caption"), costumes
+    )
+    if analysis.get("status") != "ok":
+        return TrendExtractResponse(status="unavailable")
+
+    return TrendExtractResponse(
+        status="ok",
+        thumbnail_url=extraction["thumbnail_url"],
+        matched_costume_id=analysis["matched_costume_id"],
+        adaptation_reason=analysis["adaptation_reason"],
+        detected_elements=analysis["detected_elements"],
+    )
+
+
+@router.post("/trend-extract-upload", response_model=TrendExtractResponse)
+async def trend_extract_upload(screenshot: UploadFile = File(...)):
+    """
+    Phương án dự phòng khi link TikTok/Facebook không trích xuất được: người dùng
+    tải lên ảnh chụp màn hình thay thế, vẫn qua cùng pipeline phân tích Gemini vision.
+    """
+    if not (screenshot.content_type or "").startswith("image/"):
+        return TrendExtractResponse(status="failed", reason="invalid_file_type")
+
+    image_bytes = await screenshot.read()
+    costumes = load_catalog_data().get("costumes", [])
+    analysis = trend_adapter.analyze_trend_image(
+        image_bytes, screenshot.content_type, None, costumes
+    )
+    if analysis.get("status") != "ok":
+        return TrendExtractResponse(status="unavailable")
+
+    return TrendExtractResponse(
+        status="ok",
+        matched_costume_id=analysis["matched_costume_id"],
+        adaptation_reason=analysis["adaptation_reason"],
+        detected_elements=analysis["detected_elements"],
+    )
+
 
