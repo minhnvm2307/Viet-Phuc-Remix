@@ -10,6 +10,9 @@ from backend.app.routers.auth import get_current_user
 
 router = APIRouter(prefix="/source-images", tags=["Source Images"])
 
+# ~8MB ảnh gốc, base64 phồng thêm ~33% -> làm tròn dư dả cho header data URL
+MAX_IMAGE_DATA_CHARS = 11 * 1024 * 1024
+
 @router.post("", response_model=SourceImageOut)
 def create_source_image(
     payload: SourceImageCreate,
@@ -17,6 +20,9 @@ def create_source_image(
     db: Session = Depends(get_db)
 ):
     """Lưu 1 ảnh nguồn (vd trích xuất từ trend) vào tủ ảnh cá nhân để dùng lại sau."""
+    if len(payload.image_data) > MAX_IMAGE_DATA_CHARS:
+        raise HTTPException(status_code=status.HTTP_413_CONTENT_TOO_LARGE, detail="Ảnh vượt quá dung lượng cho phép")
+
     item = SourceImage(
         user_id=current_user.id,
         image_data=payload.image_data,

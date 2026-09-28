@@ -73,3 +73,19 @@ def test_source_image_requires_auth():
         "image_data": FAKE_IMAGE_DATA, "costume_id": "test-x", "costume_name": "X"
     })
     assert res.status_code == 401
+
+def test_source_image_rejects_oversized_payload():
+    u_res = client.post("/api/auth/register", json={
+        "username": "si_user_1", "email": "si1@vietphuc.vn", "password": "Password123!"
+    })
+    token = u_res.json()["access_token"]
+
+    # base64 text roughly 12MB — bypasses link_extractor's 8MB byte cap entirely
+    # since this endpoint accepts image_data directly, not a downloaded/uploaded file
+    oversized = "data:image/jpeg;base64," + ("A" * (12 * 1024 * 1024))
+    res = client.post(
+        "/api/source-images",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"image_data": oversized, "costume_id": "test-x", "costume_name": "X"}
+    )
+    assert res.status_code == 413
