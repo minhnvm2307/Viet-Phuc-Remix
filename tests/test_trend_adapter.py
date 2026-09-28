@@ -49,6 +49,38 @@ class TestAnalyzeTrendImage(unittest.TestCase):
 
         self.assertEqual(result, {"status": "unavailable"})
 
+    @patch("app.services.trend_adapter.generate_json_from_image")
+    def test_rejects_non_hashable_costume_id(self, mock_generate):
+        mock_generate.return_value = {
+            "matched_costume_id": ["ao-tu-than"],  # list, not str -> must not crash on `in set`
+            "adaptation_reason": "...",
+            "detected_elements": {},
+        }
+        result = trend_adapter.analyze_trend_image(b"fake", "image/jpeg", None, FAKE_COSTUMES)
+        self.assertEqual(result, {"status": "unavailable"})
+
+    @patch("app.services.trend_adapter.generate_json_from_image")
+    def test_coerces_non_string_adaptation_reason(self, mock_generate):
+        mock_generate.return_value = {
+            "matched_costume_id": "ao-tu-than",
+            "adaptation_reason": ["phù hợp"],  # truthy but not a string -> .strip() must not crash
+            "detected_elements": {},
+        }
+        result = trend_adapter.analyze_trend_image(b"fake", "image/jpeg", None, FAKE_COSTUMES)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["adaptation_reason"], "['phù hợp']")
+
+    @patch("app.services.trend_adapter.generate_json_from_image")
+    def test_filters_non_string_detected_elements(self, mock_generate):
+        mock_generate.return_value = {
+            "matched_costume_id": "ao-tu-than",
+            "adaptation_reason": "phù hợp",
+            "detected_elements": {"tone": ["đỏ", "vàng"], "vibe": "mộc mạc"},  # list value must be dropped, not crash
+        }
+        result = trend_adapter.analyze_trend_image(b"fake", "image/jpeg", None, FAKE_COSTUMES)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["detected_elements"], {"vibe": "mộc mạc"})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -357,6 +357,7 @@ export default function StudioPage({
         })
       });
 
+      if (!res.ok) throw new Error('remix_generate_failed');
       const data = await res.json();
       setGuardrail(data.guardrail || null);
 

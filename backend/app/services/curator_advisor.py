@@ -138,21 +138,23 @@ def get_context_recommendations(
             if not isinstance(rec, dict):
                 continue
             costume_id = rec.get("costume_id")
-            if costume_id not in valid_costume_ids:
+            # costume_id/accessory_id phải là str hợp lệ trước khi kiểm tra `in` set
+            # (list/dict không hashable sẽ làm crash toán tử `in`).
+            if not isinstance(costume_id, str) or costume_id not in valid_costume_ids:
                 continue
             accessory_ids = [
                 aid for aid in (rec.get("accessory_ids") or [])
-                if aid in valid_accessory_ids
+                if isinstance(aid, str) and aid in valid_accessory_ids
             ][:2]
             cleaned.append({
                 "costume_id": costume_id,
-                "reason": (rec.get("reason") or "").strip(),
+                "reason": str(rec.get("reason") or "").strip(),
                 "accessory_ids": accessory_ids,
             })
 
         if cleaned:
             return {
-                "curator_intro": (ai_result.get("curator_intro") or "").strip(),
+                "curator_intro": str(ai_result.get("curator_intro") or "").strip(),
                 "recommendations": cleaned,
                 "generation_mode": "LIVE",
             }

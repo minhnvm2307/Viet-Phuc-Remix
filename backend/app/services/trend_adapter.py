@@ -77,14 +77,23 @@ def analyze_trend_image(
     valid_costume_ids = {c.get("id") for c in costumes}
     matched_id = result.get("matched_costume_id") if isinstance(result, dict) else None
 
-    if not result or matched_id not in valid_costume_ids:
+    # matched_id phải là str hợp lệ trước khi kiểm tra `in` (list/dict không hashable
+    # sẽ làm crash toán tử `in` trên set nếu không kiểm tra kiểu trước).
+    if not result or not isinstance(matched_id, str) or matched_id not in valid_costume_ids:
         if result is not None:
-            logger.warning(f"[trend_adapter] Gemini trả costume_id không hợp lệ: {matched_id}")
+            logger.warning(f"[trend_adapter] Gemini trả costume_id không hợp lệ: {matched_id!r}")
         return {"status": "unavailable"}
+
+    raw_elements = result.get("detected_elements")
+    detected_elements = (
+        {k: v for k, v in raw_elements.items() if isinstance(k, str) and isinstance(v, str)}
+        if isinstance(raw_elements, dict)
+        else {}
+    )
 
     return {
         "status": "ok",
         "matched_costume_id": matched_id,
-        "adaptation_reason": (result.get("adaptation_reason") or "").strip(),
-        "detected_elements": result.get("detected_elements") or {},
+        "adaptation_reason": str(result.get("adaptation_reason") or "").strip(),
+        "detected_elements": detected_elements,
     }

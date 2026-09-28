@@ -21,6 +21,13 @@ logger = logging.getLogger(__name__)
 
 VALID_VERDICTS = ("OK", "CAUTION", "BLOCK")
 
+# Dự phòng khi Gemini trả verdict CAUTION/BLOCK nhưng bỏ trống curator_feedback —
+# người dùng luôn phải thấy lý do, không được chặn trong im lặng.
+_DEFAULT_FEEDBACK_BY_VERDICT = {
+    "CAUTION": "Giám tuyển lưu ý mô tả này có thể chưa hoàn toàn phù hợp với quy chuẩn văn hóa của trang phục — vẫn tiếp tục tạo ảnh, bạn có thể điều chỉnh nếu muốn.",
+    "BLOCK": "Giám tuyển không thể thực hiện yêu cầu này vì có dấu hiệu xuyên tạc hoặc thiếu tôn trọng văn hóa. Vui lòng điều chỉnh lại mô tả phối đồ.",
+}
+
 GUARDRAIL_MODERATION_SYSTEM = """
 Bạn là Giám tuyển Di sản Y quan, chịu trách nhiệm kiểm định các yêu cầu phối đồ
 cổ phục Việt Nam có tôn trọng lịch sử và văn hóa hay không.
@@ -116,9 +123,15 @@ def check_remix_request(
     )
 
     if isinstance(ai_result, dict) and ai_result.get("verdict") in VALID_VERDICTS:
+        verdict = ai_result["verdict"]
+        feedback = str(ai_result.get("curator_feedback") or "").strip()
+        # BLOCK/CAUTION phải luôn có lời giải thích — nếu không, Studio sẽ chặn
+        # người dùng mà không hiển thị lý do gì, họ không biết phải sửa gì.
+        if not feedback and verdict != "OK":
+            feedback = _DEFAULT_FEEDBACK_BY_VERDICT[verdict]
         return {
-            "verdict": ai_result["verdict"],
-            "curator_feedback": (ai_result.get("curator_feedback") or "").strip(),
+            "verdict": verdict,
+            "curator_feedback": feedback,
             "source": "AI",
         }
 

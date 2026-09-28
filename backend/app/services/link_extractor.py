@@ -17,13 +17,29 @@ logger = logging.getLogger(__name__)
 
 TIKTOK_OEMBED_URL = "https://www.tiktok.com/oembed"
 FACEBOOK_OEMBED_URL = "https://graph.facebook.com/v25.0/oembed_video"
+MAX_THUMBNAIL_BYTES = 8 * 1024 * 1024  # 8MB, đủ cho thumbnail nhưng chặn payload bất thường
+
+
+class ThumbnailTooLargeError(Exception):
+    """Ảnh thumbnail vượt quá MAX_THUMBNAIL_BYTES."""
 
 
 def _detect_platform(url: str) -> Optional[str]:
-    netloc = urlparse(url).netloc.lower()
-    if "tiktok.com" in netloc:
+    """
+    Nhận diện platform bằng đúng hostname (không phải substring trên netloc) để
+    tránh bị qua mặt bởi userinfo giả (user@127.0.0.1) hoặc domain giả dạng
+    (tiktok.com.evil.example, nottiktok.com).
+    """
+    try:
+        hostname = (urlparse(url).hostname or "").lower()
+    except ValueError:
+        return None
+
+    if hostname == "tiktok.com" or hostname.endswith(".tiktok.com"):
         return "tiktok"
-    if "facebook.com" in netloc or "fb.watch" in netloc:
+    if hostname == "facebook.com" or hostname.endswith(".facebook.com"):
+        return "facebook"
+    if hostname == "fb.watch" or hostname.endswith(".fb.watch"):
         return "facebook"
     return None
 
@@ -42,7 +58,9 @@ def _extract_tiktok(url: str) -> Dict[str, Any]:
         logger.warning(f"[link_extractor] TikTok oEmbed lỗi: {err}")
 
     try:
-        with YoutubeDL({"quiet": True}) as ydl:
+        # Giới hạn đúng extractor TikTok — không cho generic extractor chạy,
+        # tránh bị lợi dụng để quét URL nội bộ khi platform detection bị qua mặt.
+        with YoutubeDL({"quiet": True, "allowed_extractors": ["TikTok*"], "socket_timeout": 10}) as ydl:
             info = ydl.extract_info(url, download=False)
         return {
             "status": "ok",
@@ -84,8 +102,13 @@ def extract_from_url(url: str) -> Dict[str, Any]:
 
 
 def download_thumbnail(thumbnail_url: str) -> Tuple[bytes, str]:
-    """Tải bytes ảnh thumbnail + mime type tốt nhất có thể xác định được."""
+    """
+    Tải bytes ảnh thumbnail + mime type tốt nhất có thể xác định được.
+    Từ chối (ThumbnailTooLargeError) nếu vượt quá MAX_THUMBNAIL_BYTES.
+    """
     response = requests.get(thumbnail_url, timeout=15)
     response.raise_for_status()
+    if len(response.content) > MAX_THUMBNAIL_BYTES:
+        raise ThumbnailTooLargeError(f"Thumbnail vượt quá {MAX_THUMBNAIL_BYTES} bytes")
     mime_type = response.headers.get("Content-Type", "image/jpeg") or "image/jpeg"
     return response.content, mime_type

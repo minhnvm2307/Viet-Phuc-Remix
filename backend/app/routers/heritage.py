@@ -274,6 +274,21 @@ def context_advisor(req: ContextAdvisorRequest):
     return ContextAdvisorResponse(**result)
 
 
+_IMAGE_MAGIC_BYTES = (
+    b"\xff\xd8\xff",  # JPEG
+    b"\x89PNG\r\n\x1a\n",  # PNG
+    b"GIF87a",
+    b"GIF89a",
+)
+
+
+def _looks_like_image(data: bytes) -> bool:
+    """Kiểm tra magic bytes thật thay vì chỉ tin Content-Type client tự khai báo."""
+    if data.startswith(_IMAGE_MAGIC_BYTES):
+        return True
+    return len(data) >= 12 and data[0:4] == b"RIFF" and data[8:12] == b"WEBP"
+
+
 @router.post("/trend-extract", response_model=TrendExtractResponse)
 def trend_extract(req: TrendExtractRequest):
     """
@@ -286,7 +301,7 @@ def trend_extract(req: TrendExtractRequest):
 
     try:
         image_bytes, mime_type = link_extractor.download_thumbnail(extraction["thumbnail_url"])
-    except requests.RequestException:
+    except (requests.RequestException, link_extractor.ThumbnailTooLargeError):
         return TrendExtractResponse(status="failed", reason="thumbnail_download_failed")
 
     costumes = load_catalog_data().get("costumes", [])
@@ -306,15 +321,27 @@ def trend_extract(req: TrendExtractRequest):
 
 
 @router.post("/trend-extract-upload", response_model=TrendExtractResponse)
-async def trend_extract_upload(screenshot: UploadFile = File(...)):
+def trend_extract_upload(screenshot: UploadFile = File(...)):
     """
     Phương án dự phòng khi link TikTok/Facebook không trích xuất được: người dùng
     tải lên ảnh chụp màn hình thay thế, vẫn qua cùng pipeline phân tích Gemini vision.
+
+    Định nghĩa `def` thường (không async): trend_adapter.analyze_trend_image là lệnh
+    gọi mạng đồng bộ tốn thời gian (tối đa 7 lần thử key) — nếu để async def, nó sẽ
+    chặn event loop và làm nghẽn mọi request khác. FastAPI tự chạy `def` thường trong
+    threadpool riêng, không chặn event loop chính.
     """
     if not (screenshot.content_type or "").startswith("image/"):
         return TrendExtractResponse(status="failed", reason="invalid_file_type")
 
-    image_bytes = await screenshot.read()
+    image_bytes = screenshot.file.read()
+
+    if len(image_bytes) > link_extractor.MAX_THUMBNAIL_BYTES:
+        return TrendExtractResponse(status="failed", reason="file_too_large")
+
+    if not _looks_like_image(image_bytes):
+        return TrendExtractResponse(status="failed", reason="invalid_file_type")
+
     costumes = load_catalog_data().get("costumes", [])
     analysis = trend_adapter.analyze_trend_image(
         image_bytes, screenshot.content_type, None, costumes

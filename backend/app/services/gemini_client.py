@@ -56,14 +56,17 @@ def _generate_and_parse_json(
 
         except genai_errors.APIError as err:
             last_error = err
-            if err.code in (429, 503):
+            # Chỉ xoay key khi lỗi có tính tạm thời (quota/quá tải/lỗi server phía
+            # Gemini) — lỗi 4xx còn lại (vd 400 do input hỏng) là lỗi cố định, sẽ
+            # thất bại giống hệt trên MỌI key, xoay hết 7 key chỉ tốn quota vô ích.
+            if err.code == 429 or err.code >= 500:
                 logger.warning(
                     f"[gemini_client] Key #{key_index + 1} hết quota/quá tải "
                     f"(code={err.code}). Thử key kế tiếp..."
                 )
-            else:
-                logger.error(f"[gemini_client] Lỗi API Gemini (code={err.code}): {err}")
-            continue
+                continue
+            logger.error(f"[gemini_client] Lỗi API Gemini không thể phục hồi (code={err.code}): {err}")
+            break
 
         except (json.JSONDecodeError, ValueError) as err:
             last_error = err

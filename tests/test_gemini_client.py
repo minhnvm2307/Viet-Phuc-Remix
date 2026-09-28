@@ -77,6 +77,30 @@ class TestGenerateJsonFromImage(unittest.TestCase):
 
         self.assertEqual(result, {"matched_costume_id": "ao-tac"})
 
+    @patch("app.services.gemini_client.settings")
+    @patch("app.services.gemini_client.genai.Client")
+    def test_does_not_rotate_keys_on_deterministic_400_error(self, mock_client_cls, mock_settings):
+        """
+        A 400 (bad input, e.g. corrupt image) is the caller's fault and will fail
+        identically on every key — rotating through all 7 just wastes quota/latency.
+        Only 429/503 (transient/quota) should trigger a retry on the next key.
+        """
+        from google.genai import errors as genai_errors
+
+        mock_settings.GEMINI_API_KEYS = ["key-1", "key-2"]
+        mock_settings.GEMINI_TEXT_MODEL = "gemini-2.5-flash"
+        gemini_client._client_cache.clear()
+
+        bad_input_error = genai_errors.APIError(400, {"error": {"message": "invalid image", "status": "INVALID_ARGUMENT"}})
+        mock_instance_1 = MagicMock()
+        mock_instance_1.models.generate_content.side_effect = bad_input_error
+        mock_client_cls.side_effect = [mock_instance_1]  # only ONE client should ever be constructed
+
+        result = gemini_client.generate_json("system", "user prompt")
+
+        self.assertIsNone(result)
+        mock_client_cls.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
