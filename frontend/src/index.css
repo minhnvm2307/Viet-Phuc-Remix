@@ -572,11 +572,13 @@ nav button.active {
   border: 1px solid #E5E0D8;
   cursor: pointer;
   color: #8C2D19;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 6px 12px;
-  border-radius: 6px;
+  font-size: 13px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.15s ease;
 }
 
@@ -584,6 +586,7 @@ nav button.active {
   background: #8C2D19;
   color: #FFFFFF;
   border-color: #8C2D19;
+  transform: scale(1.05);
 }
 
 .costume-pill-list {
@@ -788,14 +791,14 @@ nav button.active {
 .btn-change-photo {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   background: rgba(20, 18, 16, 0.75);
   color: #FFFFFF;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 5px 12px;
-  border-radius: 14px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 13px;
   cursor: pointer;
   backdrop-filter: blur(6px);
   transition: all 0.15s;
@@ -804,19 +807,20 @@ nav button.active {
 .btn-change-photo:hover {
   background: rgba(20, 18, 16, 0.95);
   border-color: #FFFFFF;
+  transform: scale(1.08);
 }
 
 .btn-remove-photo {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   background: rgba(20, 18, 16, 0.75);
   color: #FFFFFF;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 5px 10px;
-  border-radius: 14px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 13px;
   cursor: pointer;
   backdrop-filter: blur(6px);
   transition: all 0.15s;
@@ -825,9 +829,10 @@ nav button.active {
 .btn-remove-photo:hover {
   background: #8C2D19;
   border-color: #8C2D19;
+  transform: scale(1.08);
 }
 
-/* BIỂU TƯỢNG KẾT HỢP Ở CHÍNH GIỮA 2 ẢNH (KHÔNG DÙNG ICON) */
+/* BIỂU TƯỢNG KẾT HỢP Ở CHÍNH GIỮA 2 ẢNH */
 .mix-transfer-indicator {
   position: absolute;
   top: 50%;
@@ -843,14 +848,15 @@ nav button.active {
 .mix-transfer-indicator .indicator-label {
   background: #8C2D19;
   color: #FFFFFF;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  padding: 6px 14px;
-  border-radius: 20px;
+  font-size: 13px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid #FFFFFF;
   box-shadow: 0 4px 14px rgba(140, 45, 25, 0.45);
-  white-space: nowrap;
 }
 
 /* Nửa phải: Ảnh mẫu cổ phục */
@@ -1232,44 +1238,85 @@ nav button.active {
 
 .nano-card-two {
   position: relative;
-  height: 290px;
-  border-radius: 14px;
+  min-height: 380px;
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
   overflow: hidden;
-  background: #14121A;
+  background: #0E0D13;
   border: 2px solid #EAE5DC;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
 }
 
 .nano-card-two.active {
   border-color: #8C2D19;
-  box-shadow: 0 6px 20px rgba(140, 45, 25, 0.28);
+  box-shadow: 0 8px 26px rgba(140, 45, 25, 0.35);
 }
 
 .nano-pure-img-wrapper {
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0D0C12;
+  position: relative;
   overflow: hidden;
 }
 
 .nano-pure-img-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   transition: transform 0.35s ease;
 }
 
 .nano-card-two:hover .nano-pure-img-wrapper img {
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
 
-/* HIỆU ỨNG LOADING MỜ MỜ NHƯ WATER KIỂU NANO BANANA CỦA GEMINI */
+.nano-card-hover-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14, 13, 19, 0.88);
+  backdrop-filter: blur(10px);
+  color: #FDFBF7;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  opacity: 0;
+  transition: all 0.25s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.nano-card-two:hover .nano-card-hover-hint {
+  opacity: 1;
+  bottom: 18px;
+}
+
+/* HIỆU ỨNG LOADING MỜ MỜ NHƯ WATER KIỂU NANO BANANA CỦA GEMINI CÙNG STEPPER TIẾN TRÌNH */
 .nano-water-loader {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #101622 0%, #172437 50%, #0F1726 100%);
+  background: linear-gradient(135deg, #0d131f 0%, #162439 50%, #0d1424 100%);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
 
 .water-wave-layer {
@@ -1278,13 +1325,13 @@ nav button.active {
   height: 250%;
   top: -75%;
   left: -75%;
-  background: radial-gradient(ellipse at center, rgba(140, 200, 255, 0.3) 0%, rgba(70, 150, 240, 0.12) 40%, transparent 68%);
+  background: radial-gradient(ellipse at center, rgba(140, 200, 255, 0.28) 0%, rgba(70, 150, 240, 0.12) 40%, transparent 68%);
   animation: waterRippleMotion 5s infinite ease-in-out;
   filter: blur(16px);
 }
 
 .water-wave-layer.secondary {
-  background: radial-gradient(ellipse at 40% 60%, rgba(180, 230, 255, 0.22) 0%, rgba(100, 180, 255, 0.08) 45%, transparent 72%);
+  background: radial-gradient(ellipse at 40% 60%, rgba(180, 230, 255, 0.2) 0%, rgba(100, 180, 255, 0.08) 45%, transparent 72%);
   animation: waterRippleMotion 7s infinite reverse ease-in-out;
   filter: blur(22px);
 }
@@ -1292,9 +1339,75 @@ nav button.active {
 .water-shimmer-glow {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.14) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 50%, transparent 100%);
   animation: waterFlowMotion 2.2s infinite linear;
   backdrop-filter: blur(10px);
+}
+
+/* HỘP TIẾN TRÌNH TẠO ẢNH TRỰC QUAN (KHÔNG LỘ PROMPT) */
+.nano-loader-progress-box {
+  position: relative;
+  z-index: 10;
+  max-width: 90%;
+  text-align: center;
+  background: rgba(14, 18, 28, 0.72);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.loader-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #C48B28;
+  margin-bottom: 8px;
+}
+
+.loader-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #C48B28;
+  animation: pulseDot 1.4s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.loader-step-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #FDFBF7;
+  font-weight: 500;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-progress-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.loader-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8C2D19, #C48B28);
+  border-radius: 2px;
+  transition: width 0.4s ease;
 }
 
 @keyframes waterRippleMotion {
@@ -1313,6 +1426,189 @@ nav button.active {
   100% {
     transform: translateX(100%);
   }
+}
+
+/* FLOATING CARD MODAL (PHÓNG TO / TẢI VỀ / CHỈNH SỬA THÊM) */
+.floating-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 7, 12, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.floating-preview-card {
+  position: relative;
+  background: #17151E;
+  border: 1px solid rgba(234, 229, 220, 0.2);
+  border-radius: 20px;
+  max-width: 960px;
+  width: 100%;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.floating-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #13111A;
+}
+
+.floating-preview-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: #FDFBF7;
+}
+
+.floating-preview-meta {
+  font-size: 12px;
+  color: var(--color-accent);
+  margin-top: 2px;
+}
+
+.floating-preview-close-btn {
+  background: transparent;
+  border: none;
+  color: #EAE5DC;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.floating-preview-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFF;
+}
+
+.floating-preview-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0B0A0F;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.floating-preview-img-box {
+  width: 100%;
+  height: 100%;
+  max-height: 58vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-preview-img-box img {
+  max-width: 100%;
+  max-height: 58vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.floating-preview-footer {
+  padding: 18px 24px 22px;
+  background: #17151E;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.floating-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.floating-download-btn {
+  background: var(--color-primary);
+  color: #FFF;
+  border: none;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(140, 45, 25, 0.4);
+}
+
+.floating-download-btn:hover {
+  background: #A7321C;
+  transform: scale(1.08);
+}
+
+.floating-refine-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.floating-refine-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 10px 18px;
+  color: #FDFBF7;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.floating-refine-input:focus {
+  border-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.floating-refine-btn {
+  background: #252230;
+  color: #FDFBF7;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.floating-refine-btn:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  transform: scale(1.08);
+}
+
+.floating-refine-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* Suggestion Chips */
@@ -1390,30 +1686,30 @@ nav button.active {
 }
 
 .prompt-submit-btn {
+  width: 36px;
   height: 36px;
-  padding: 0 16px;
-  border-radius: 20px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 50%;
   background: #8C2D19;
   color: #FFFFFF;
   border: none;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  white-space: nowrap;
   transition: transform 0.15s, filter 0.15s;
+  box-shadow: 0 2px 8px rgba(140, 45, 25, 0.35);
 }
 
 .prompt-submit-btn:hover {
-  filter: brightness(1.1);
-  transform: scale(1.05);
+  filter: brightness(1.15);
+  transform: scale(1.08);
 }
 
 .prompt-submit-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -2821,4 +3117,306 @@ nav button.active {
     max-height: 85vh;
     overflow-y: auto;
   }
+}
+
+/* ================================================================
+   GIÁM TUYỂN THEO BỐI CẢNH (CONTEXT ADVISOR) & GHI CHÚ VĂN HÓA
+   Tối giản: không icon, không caption dài dưới nút.
+   ================================================================ */
+
+.advisor-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  height: 34px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-line);
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.advisor-trigger-btn:hover {
+  border-color: var(--dynasty-color);
+  color: var(--dynasty-color);
+}
+
+/* Ghi chú Giám tuyển (Cultural Guardrail Note) */
+.curator-guardrail-note {
+  margin-top: 14px;
+  padding: 14px 18px;
+  background: #F8F5F0;
+  border-left: 2px solid var(--dynasty-color);
+  border-radius: 0 10px 10px 0;
+}
+
+.curator-guardrail-note.blocked {
+  border-left-color: #5C3D3D;
+  background: #F5EFEC;
+}
+
+.curator-guardrail-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dynasty-color);
+  margin-bottom: 6px;
+}
+
+.curator-guardrail-note.blocked .curator-guardrail-label {
+  color: #5C3D3D;
+}
+
+.curator-guardrail-text {
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--text-main);
+  margin: 0;
+}
+
+/* Trang Gợi Ý Theo Bối Cảnh (/advisor) */
+.advisor-page-header {
+  max-width: 680px;
+  margin: 0 auto 32px;
+  text-align: center;
+}
+
+.advisor-page-title {
+  font-family: var(--font-serif);
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 8px;
+}
+
+.advisor-page-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.advisor-page-body {
+  max-width: 680px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid var(--border-line);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  padding: 28px 32px;
+}
+
+.advisor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.advisor-chip-group,
+.advisor-freetext-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.advisor-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.advisor-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.advisor-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid var(--border-line);
+  background: #FAF8F5;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.advisor-chip:hover {
+  border-color: var(--dynasty-color);
+  color: var(--dynasty-color);
+}
+
+.advisor-chip.active {
+  background: var(--dynasty-color);
+  border-color: var(--dynasty-color);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.advisor-textarea {
+  resize: none;
+  border: 1px solid var(--border-line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-main);
+  outline: none;
+  background: #FFFFFF;
+}
+
+.advisor-textarea:focus {
+  border-color: var(--dynasty-color);
+}
+
+.advisor-error-text {
+  font-size: 12px;
+  color: #A83232;
+}
+
+.advisor-submit-btn {
+  align-self: flex-start;
+}
+
+.advisor-results {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.advisor-intro-text {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.advisor-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.advisor-recommend-card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  border: 1px solid var(--border-line);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.advisor-card-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #F7F4EE;
+}
+
+.advisor-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.advisor-card-era {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dynasty-color);
+}
+
+.advisor-card-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 4px 0 6px;
+  color: var(--text-main);
+}
+
+.advisor-card-reason {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+
+.advisor-card-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dynasty-color);
+  cursor: pointer;
+}
+
+.advisor-card-action:hover {
+  text-decoration: underline;
+}
+
+.advisor-retry-btn {
+  align-self: flex-start;
+}
+
+@media (max-width: 640px) {
+  .advisor-page-body {
+    padding: 22px 20px;
+  }
+  .advisor-recommend-card {
+    grid-template-columns: 1fr;
+  }
+  .advisor-card-img {
+    width: 100%;
+    height: 160px;
+  }
+}
+
+/* Tab bar trên trang /advisor (Theo Bối Cảnh | Theo Trend) */
+.advisor-tab-bar {
+  display: flex;
+  gap: 8px;
+  max-width: 680px;
+  margin: 0 auto 20px;
+}
+
+/* Ô tải ảnh chụp màn hình dự phòng khi link trend không trích xuất được */
+.advisor-trend-upload-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px dashed var(--border-line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #FBF9F5 0%, #F5F1E9 100%);
+  color: var(--text-muted);
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.advisor-trend-upload-zone:hover {
+  background: linear-gradient(180deg, #F9F5EC 0%, #EFEAE0 100%);
+}
+
+.advisor-trend-upload-zone img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+  object-fit: contain;
 }
