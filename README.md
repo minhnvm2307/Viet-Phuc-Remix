@@ -22,8 +22,6 @@
 
 Viet Phuc Remix la he thong so hoa di san trang phuc truyen thong Viet Nam ket hop tro ly tao mau thoi trang da phuong thuc (Multimodal AI). Du an ket noi kho tang y quan cac trieu dai Ly, Tran, Hau Le va Nguyen voi ngon ngu thoi trang ung dung duong dai danh cho the he tre, dam bao nghiem ngat tinh chuan xac van hoa va quy che vat huu truyen thong.
 
-Dia chi he thong truc tuyen: http://18.143.106.238
-
 ---
 
 ## 2. Cac tinh nang chinh
