@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// Trang "Gợi Ý Phối Đồ" — 1 form duy nhất gộp Bối cảnh + Cảm hứng, theo đúng
-// bố cục 2 cột trong mockup Claude Design. Không icon, copy ngắn gọn.
+// Trang "Gợi Ý Phối Đồ" — port 1:1 từ docs/advisor-2a.html + docs/advisor-2b.html
+// (Claude Design). 1 form duy nhất gộp Dịp + Cảm Hứng. Không icon.
 
 const OCCASION_OPTIONS = ['Đi học', 'Dạo phố', 'Dạ tiệc', 'Lễ hội', 'Cưới hỏi', 'Chụp lookbook'];
 const WEATHER_OPTIONS = ['Nóng', 'Mát', 'Lạnh', 'Mưa'];
@@ -55,10 +55,7 @@ export default function AdvisorPage({ onRequireAuth }) {
   const filterSummaryParts = [occasion, weather, vibe].filter(Boolean);
   const extraInspirationCount = (trendUrl.trim() || uploadFile) ? 1 : 0;
 
-  const handleRemoveLink = () => {
-    setTrendUrl('');
-    setShowUploadFallback(false);
-  };
+  const handleRemoveLink = () => setTrendUrl('');
 
   const handleUploadFile = (file) => {
     if (!file || !file.type.startsWith('image/')) return;
@@ -94,11 +91,10 @@ export default function AdvisorPage({ onRequireAuth }) {
         setResult(data);
         setShowUploadFallback(false);
       } else if (data.status === 'failed' && !uploadFile) {
-        // Link lỗi (riêng tư/không hỗ trợ) -> cho phép tải ảnh chụp màn hình thay thế
         setErrorMsg(
           data.reason === 'invalid_file_type' || data.reason === 'file_too_large'
             ? 'Ảnh không hợp lệ, vui lòng thử ảnh khác.'
-            : 'Không truy cập được link này — hãy thử tải ảnh chụp màn hình thay thế.'
+            : 'Bài đăng này ở chế độ riêng tư hoặc không hỗ trợ — gửi ảnh chụp màn hình thay thế.'
         );
         setShowUploadFallback(true);
       } else if (data.status === 'failed') {
@@ -142,7 +138,7 @@ export default function AdvisorPage({ onRequireAuth }) {
   };
 
   const resultsHeaderLabel = result
-    ? `PHIẾU GỢI Ý · ${[...filterSummaryParts, extraInspirationCount ? `+${extraInspirationCount} CẢM HỨNG` : null].filter(Boolean).join(' · ').toUpperCase()}`
+    ? `PHIẾU GỢI Ý · ${[...filterSummaryParts, extraInspirationCount ? `+ ${extraInspirationCount} CẢM HỨNG` : null].filter(Boolean).join(' · ').toUpperCase()}`
     : 'PHIẾU GỢI Ý · CHƯA CÓ';
   const resultsCountLabel = result ? `${1 + result.secondary.length} bộ` : 'Điền ít nhất một mục';
 
@@ -151,120 +147,121 @@ export default function AdvisorPage({ onRequireAuth }) {
       <div className="advisor-studio-layout">
         {/* CỘT TRÁI: FORM NHẬP */}
         <aside className="advisor-sidebar">
-          <div className="landing-kicker-badge">
-            <span>GIÁM TUYỂN THỜI TRANG SỐ</span>
+          <div className="advisor-sidebar-kicker-wrap">
+            <span className="advisor-kicker-badge">GIÁM TUYỂN THỜI TRANG SỐ</span>
+            <h1 className="advisor-sidebar-title">Gợi Ý<br />Phối Đồ</h1>
+            <p className="advisor-sidebar-subtitle">
+              Cho biết dịp mặc, thêm một cảm hứng nếu có — nhận 1–3 bộ cổ phục đã chọn sẵn.
+            </p>
           </div>
-          <h1 className="advisor-sidebar-title">Gợi Ý Phối Đồ</h1>
-          <p className="advisor-sidebar-subtitle">
-            Cho biết dịp mặc, thêm một cảm hứng nếu có — nhận 1-3 bộ cổ phục đã chọn sẵn.
-          </p>
 
-          <div className="advisor-sidebar-divider" />
-
-          <form onSubmit={handleSubmit}>
-            <div className="advisor-section-header">
-              <span className="advisor-section-roman">I.</span>
-              <span className="advisor-section-title">Dịp</span>
-              <span className="advisor-section-hint">Bạn mặc khi nào</span>
-            </div>
-
-            <ChipGroup label="SỰ KIỆN" options={OCCASION_OPTIONS} value={occasion} onChange={setOccasion} />
-            <ChipGroup label="THỜI TIẾT" options={WEATHER_OPTIONS} value={weather} onChange={setWeather} />
-            <ChipGroup label="PHONG CÁCH" options={VIBE_OPTIONS} value={vibe} onChange={setVibe} />
-
-            <textarea
-              className="advisor-textarea"
-              rows={2}
-              value={freeText}
-              onChange={(e) => setFreeText(e.target.value)}
-              placeholder="Đi xem triển lãm ở Bảo tàng Mỹ thuật cuối tuần…"
-            />
-
-            <div className="advisor-sidebar-divider" />
-
-            <div className="advisor-section-header">
-              <span className="advisor-section-roman">II.</span>
-              <span className="advisor-section-title">Cảm Hứng</span>
-              <span className="advisor-section-hint">Không bắt buộc</span>
-            </div>
-
-            {!showUploadFallback && (
-              <div className="advisor-freetext-group">
-                <span className="advisor-group-label">Link TikTok / Facebook</span>
-                <div className="advisor-link-input-row">
-                  <input
-                    type="text"
-                    className="advisor-textarea advisor-link-input"
-                    value={trendUrl}
-                    onChange={(e) => setTrendUrl(e.target.value)}
-                    placeholder="Dán link video/bài viết bạn thấy đang trend"
-                  />
-                  {trendUrl && (
-                    <button type="button" className="advisor-link-remove-btn" onClick={handleRemoveLink}>
-                      Gỡ
-                    </button>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className="advisor-inline-link-btn"
-                  onClick={() => setShowUploadFallback(true)}
-                >
-                  Link riêng tư? Tải ảnh chụp màn hình
-                </button>
+          <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
+            <div className="advisor-form-section">
+              <div className="advisor-section-header">
+                <span className="advisor-section-roman">I.</span>
+                <span className="advisor-section-title">Dịp</span>
+                <span className="advisor-section-hint">Bạn mặc khi nào</span>
               </div>
-            )}
 
-            {showUploadFallback && (
-              <div className="advisor-freetext-group">
-                <div
-                  className="advisor-trend-upload-zone"
-                  onClick={() => document.getElementById('advisor-upload-input')?.click()}
-                >
-                  {uploadPreviewUrl ? (
-                    <img src={uploadPreviewUrl} alt="Ảnh chụp màn hình đã chọn" />
+              <ChipGroup label="SỰ KIỆN" options={OCCASION_OPTIONS} value={occasion} onChange={setOccasion} />
+              <ChipGroup label="THỜI TIẾT" options={WEATHER_OPTIONS} value={weather} onChange={setWeather} />
+              <ChipGroup label="PHONG CÁCH" options={VIBE_OPTIONS} value={vibe} onChange={setVibe} />
+
+              <textarea
+                className="advisor-textarea"
+                rows={2}
+                value={freeText}
+                onChange={(e) => setFreeText(e.target.value)}
+                placeholder="Đi xem triển lãm ở Bảo tàng Mỹ thuật cuối tuần…"
+              />
+            </div>
+
+            <div className="advisor-form-section">
+              <div className="advisor-section-header">
+                <span className="advisor-section-roman">II.</span>
+                <span className="advisor-section-title">Cảm Hứng</span>
+                <span className="advisor-section-hint">Không bắt buộc</span>
+              </div>
+
+              {!showUploadFallback && (
+                <div className="advisor-freetext-group">
+                  <span className="advisor-group-label">LINK TIKTOK / FACEBOOK</span>
+                  {trendUrl ? (
+                    <div className="advisor-link-preview">
+                      <div className="advisor-link-preview-text">
+                        <span className="advisor-link-preview-url">{trendUrl}</span>
+                      </div>
+                      <button type="button" className="advisor-link-remove-btn" onClick={handleRemoveLink}>
+                        Gỡ
+                      </button>
+                    </div>
                   ) : (
-                    <span>Kéo ảnh vào đây · JPG, PNG — tối đa 10MB</span>
+                    <input
+                      type="text"
+                      className="advisor-textarea"
+                      value={trendUrl}
+                      onChange={(e) => setTrendUrl(e.target.value)}
+                      placeholder="Dán link video/bài viết bạn thấy đang trend"
+                    />
                   )}
+                  <button type="button" className="advisor-inline-link-btn" onClick={() => setShowUploadFallback(true)}>
+                    Link riêng tư? <span>Tải ảnh chụp màn hình</span>
+                  </button>
                 </div>
-                <input
-                  id="advisor-upload-input"
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={(e) => handleUploadFile(e.target.files?.[0])}
-                />
-                <button
-                  type="button"
-                  className="advisor-inline-link-btn"
-                  onClick={() => {
-                    setShowUploadFallback(false);
-                    setUploadFile(null);
-                    setUploadPreviewUrl(null);
-                  }}
-                >
-                  Dùng link thay thế
-                </button>
-              </div>
-            )}
+              )}
 
-            {errorMsg && <div className="advisor-error-text">{errorMsg}</div>}
+              {showUploadFallback && (
+                <div className="advisor-freetext-group">
+                  {errorMsg && <div className="advisor-fb-private-warning">{errorMsg}</div>}
+                  {uploadPreviewUrl ? (
+                    <div className="advisor-trend-upload-preview">
+                      <img src={uploadPreviewUrl} alt="Ảnh chụp màn hình đã chọn" />
+                    </div>
+                  ) : (
+                    <div className="advisor-trend-upload-zone" onClick={() => document.getElementById('advisor-upload-input')?.click()}>
+                      <div className="advisor-trend-upload-zone-text">
+                        <span className="advisor-trend-upload-zone-title">Kéo ảnh vào đây</span>
+                        <span className="advisor-trend-upload-zone-hint">JPG, PNG · tối đa 10MB</span>
+                      </div>
+                      <span className="advisor-choose-file-btn">Chọn ảnh</span>
+                    </div>
+                  )}
+                  <input
+                    id="advisor-upload-input"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleUploadFile(e.target.files?.[0])}
+                  />
+                  <button
+                    type="button"
+                    className="advisor-inline-link-btn"
+                    onClick={() => {
+                      setShowUploadFallback(false);
+                      setUploadFile(null);
+                      setUploadPreviewUrl(null);
+                      setErrorMsg('');
+                    }}
+                  >
+                    <span>Dùng link thay thế</span>
+                  </button>
+                </div>
+              )}
+            </div>
 
-            <button
-              type="submit"
-              className="btn-editorial-primary advisor-submit-btn-full"
-              disabled={!hasAnyInput || isLoading}
-            >
+            {errorMsg && !showUploadFallback && <div className="advisor-error-text">{errorMsg}</div>}
+
+            <button type="submit" className="advisor-submit-btn-full" disabled={!hasAnyInput || isLoading}>
               {isLoading ? 'Đang tổng hợp' : 'Nhận gợi ý'}
             </button>
           </form>
 
           <div className="advisor-steps-indicator">
-            <span>01 Chọn</span>
+            <span className="active">01 Chọn</span>
             <span>—</span>
-            <span>02 Phân tích</span>
+            <span className="active">02 Phân tích</span>
             <span>—</span>
-            <span>03 Phối đồ</span>
+            <span className="active">03 Phối đồ</span>
           </div>
         </aside>
 
@@ -274,9 +271,10 @@ export default function AdvisorPage({ onRequireAuth }) {
             <span>{resultsHeaderLabel}</span>
             <span className="advisor-results-count">{resultsCountLabel}</span>
           </div>
-          <div className="advisor-results-divider" />
 
-          <p className="advisor-big-quote">“{result ? result.curator_quote : PLACEHOLDER_QUOTE}”</p>
+          <p className={`advisor-big-quote ${!result ? 'is-empty' : ''}`}>
+            "{result ? result.curator_quote : PLACEHOLDER_QUOTE}"
+          </p>
 
           {result && (
             <div className="advisor-primary-card">
@@ -289,13 +287,12 @@ export default function AdvisorPage({ onRequireAuth }) {
                 <span>{result.primary.era_origin}</span>
               </div>
 
-              <div
-                className="advisor-primary-media"
-                style={{ gridTemplateColumns: result.source_image_data_url ? '1fr 1.2fr 1fr' : '1fr' }}
-              >
+              <div className={`advisor-primary-media ${result.source_image_data_url ? '' : 'no-source'}`}>
                 {result.source_image_data_url && (
                   <div className="advisor-media-box">
-                    <img src={result.source_image_data_url} alt="Ảnh cảm hứng" />
+                    <div className="advisor-media-frame">
+                      <img src={result.source_image_data_url} alt="Ảnh cảm hứng" />
+                    </div>
                     <span className="advisor-media-caption">Ảnh từ link</span>
                   </div>
                 )}
@@ -305,18 +302,18 @@ export default function AdvisorPage({ onRequireAuth }) {
                     {result.primary.mapping.map((row) => (
                       <div key={row.label} className="advisor-mapping-row">
                         <span className="advisor-mapping-label">{row.label}</span>
-                        <div className="advisor-mapping-values">
-                          <span>{row.source_value}</span>
-                          <span className="advisor-mapping-arrow">→</span>
-                          <span>{row.target_value}</span>
-                        </div>
+                        <span className="advisor-mapping-from">{row.source_value}</span>
+                        <span className="advisor-mapping-arrow">→</span>
+                        <span className="advisor-mapping-to">{row.target_value}</span>
                       </div>
                     ))}
                   </div>
                 )}
 
                 <div className="advisor-media-box">
-                  <img src={result.primary.cover_image} alt={result.primary.name} />
+                  <div className="advisor-media-frame">
+                    <img src={result.primary.cover_image} alt={result.primary.name} />
+                  </div>
                   <span className="advisor-media-caption">Kho di sản</span>
                 </div>
               </div>
@@ -327,7 +324,7 @@ export default function AdvisorPage({ onRequireAuth }) {
                   {result.source_image_data_url && (
                     <button
                       type="button"
-                      className="btn-editorial-secondary"
+                      className="advisor-btn-outline"
                       onClick={handleSaveToGallery}
                       disabled={saveState === 'saving' || saveState === 'saved'}
                     >
@@ -336,7 +333,7 @@ export default function AdvisorPage({ onRequireAuth }) {
                   )}
                   <button
                     type="button"
-                    className="btn-editorial-primary"
+                    className="advisor-btn-filled"
                     onClick={() => handleUseInStudio(result.primary.costume_id, result.source_image_data_url)}
                   >
                     Phối đồ ngay
@@ -350,19 +347,17 @@ export default function AdvisorPage({ onRequireAuth }) {
             <div className="advisor-secondary-grid">
               {result.secondary.map((rec, idx) => (
                 <div key={rec.costume_id} className="advisor-secondary-card">
-                  <div className="advisor-secondary-img">
+                  <div className="advisor-secondary-img-frame">
                     <img src={rec.cover_image} alt={rec.name} />
                   </div>
-                  <span className="advisor-secondary-tag">{`0${idx + 2} · ${rec.tag}`}</span>
-                  <h4 className="advisor-secondary-title">{rec.name}</h4>
-                  <p className="advisor-secondary-reason">{rec.reason}</p>
-                  <button
-                    type="button"
-                    className="advisor-card-action"
-                    onClick={() => handleUseInStudio(rec.costume_id, null)}
-                  >
-                    Phối đồ ngay →
-                  </button>
+                  <div className="advisor-secondary-body">
+                    <span className="advisor-secondary-tag">{`0${idx + 2} · ${rec.tag}`}</span>
+                    <h4 className="advisor-secondary-title">{rec.name}</h4>
+                    <p className="advisor-secondary-reason">{rec.reason}</p>
+                    <button type="button" className="advisor-card-action" onClick={() => handleUseInStudio(rec.costume_id, null)}>
+                      Phối đồ ngay →
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -373,10 +368,12 @@ export default function AdvisorPage({ onRequireAuth }) {
               <div className="advisor-empty-explainer-card">
                 <h4>I. Dịp</h4>
                 <p>Chọn sự kiện, thời tiết, phong cách — giám tuyển lọc kho di sản theo đúng hoàn cảnh.</p>
+                <div className="advisor-empty-explainer-img" />
               </div>
               <div className="advisor-empty-explainer-card">
                 <h4>II. Cảm Hứng</h4>
                 <p>Dán link TikTok hoặc Facebook — màu sắc, phom dáng, vibe được ánh xạ sang Việt phục.</p>
+                <div className="advisor-empty-explainer-img" />
               </div>
             </div>
           )}
