@@ -112,3 +112,35 @@ class TrendExtractResponse(BaseModel):
     adaptation_reason: str = ""
     detected_elements: Dict[str, str] = Field(default_factory=dict)
     reason: Optional[str] = None
+
+
+class AdvisorMappingRow(BaseModel):
+    label: str
+    source_value: str
+    target_value: str
+
+
+class AdvisorCostumeCard(BaseModel):
+    costume_id: str
+    name: str
+    era_origin: str
+    cover_image: str
+
+
+class AdvisorPrimaryResult(AdvisorCostumeCard):
+    mapping: List[AdvisorMappingRow] = Field(default_factory=list)
+
+
+class AdvisorSecondaryResult(AdvisorCostumeCard):
+    tag: str = ""
+    reason: str = ""
+
+
+class AdvisorResponse(BaseModel):
+    status: str  # ok | failed | unavailable
+    reason: Optional[str] = None
+    curator_quote: str = ""
+    source_image_data_url: Optional[str] = None
+    source_label: Optional[str] = None
+    primary: Optional[AdvisorPrimaryResult] = None
+    secondary: List[AdvisorSecondaryResult] = Field(default_factory=list)

@@ -7,7 +7,7 @@ import json
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 from pydantic import BaseModel
-from fastapi import APIRouter, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 import requests
 from app.core.config import settings
 from app.schemas.heritage import (
@@ -19,6 +19,7 @@ from app.schemas.heritage import (
     ContextAdvisorResponse,
     TrendExtractRequest,
     TrendExtractResponse,
+    AdvisorResponse,
 )
 from app.services.prompt_template import (
     build_secure_remix_prompt,
@@ -27,7 +28,7 @@ from app.services.prompt_template import (
 )
 from app.services.cultural_guardrail import check_remix_request
 from app.services.curator_advisor import get_context_recommendations
-from app.services import link_extractor, trend_adapter
+from app.services import link_extractor, trend_adapter, advisor_combined
 
 router = APIRouter(prefix="/heritage", tags=["Heritage Catalog"])
 
@@ -362,6 +363,105 @@ def trend_extract_upload(screenshot: UploadFile = File(...)):
         matched_costume_id=analysis["matched_costume_id"],
         adaptation_reason=analysis["adaptation_reason"],
         detected_elements=analysis["detected_elements"],
+    )
+
+
+def _find_costume(costume_id: str, costumes: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    return next((c for c in costumes if c.get("id") == costume_id), None)
+
+
+def _costume_card_fields(costume: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "costume_id": costume.get("id"),
+        "name": costume.get("name", ""),
+        "era_origin": costume.get("era_origin", ""),
+        "cover_image": costume.get("cover_image", ""),
+    }
+
+
+@router.post("/advisor", response_model=AdvisorResponse)
+def advisor(
+    occasion: Optional[str] = Form(None),
+    weather: Optional[str] = Form(None),
+    vibe: Optional[str] = Form(None),
+    free_text: Optional[str] = Form(None),
+    source_url: Optional[str] = Form(None),
+    screenshot: Optional[UploadFile] = File(None),
+):
+    """
+    Gợi ý phối đồ hợp nhất: nhận cả bối cảnh (sự kiện/thời tiết/phong cách/mô tả)
+    VÀ/HOẶC 1 ảnh cảm hứng (link trend hoặc ảnh chụp màn hình) trong 1 request duy
+    nhất, trả về 1 gợi ý chính (kèm bảng ánh xạ khi có ảnh) + tối đa 2 gợi ý phụ.
+
+    `def` thường (không async) vì có thể gọi Gemini vision đồng bộ, tốn thời gian —
+    để FastAPI tự chạy trong threadpool, không chặn event loop.
+    """
+    if not any([occasion, weather, vibe, free_text, source_url, screenshot and screenshot.filename]):
+        return AdvisorResponse(status="failed", reason="empty_request")
+
+    image_bytes: Optional[bytes] = None
+    mime_type: Optional[str] = None
+    source_label: Optional[str] = None
+
+    if screenshot is not None and screenshot.filename:
+        raw = screenshot.file.read()
+        if len(raw) > link_extractor.MAX_THUMBNAIL_BYTES:
+            return AdvisorResponse(status="failed", reason="file_too_large")
+        if not _looks_like_image(raw):
+            return AdvisorResponse(status="failed", reason="invalid_file_type")
+        image_bytes, mime_type = raw, screenshot.content_type
+    elif source_url:
+        extraction = link_extractor.extract_from_url(source_url)
+        if extraction.get("status") != "ok":
+            return AdvisorResponse(status="failed", reason=extraction.get("reason"))
+        try:
+            image_bytes, mime_type = link_extractor.download_thumbnail(extraction["thumbnail_url"])
+        except (requests.RequestException, link_extractor.ThumbnailTooLargeError):
+            return AdvisorResponse(status="failed", reason="thumbnail_download_failed")
+        source_label = extraction.get("caption")
+
+    costumes = load_catalog_data().get("costumes", [])
+    result = advisor_combined.get_combined_recommendations(
+        occasion=occasion,
+        weather=weather,
+        vibe=vibe,
+        free_text=free_text,
+        image_bytes=image_bytes,
+        mime_type=mime_type,
+        costumes=costumes,
+    )
+
+    if result.get("status") != "ok":
+        return AdvisorResponse(status="unavailable")
+
+    primary_costume = _find_costume(result["primary"]["costume_id"], costumes)
+    if not primary_costume:
+        return AdvisorResponse(status="unavailable")
+
+    secondary_cards = []
+    for rec in result.get("secondary", []):
+        costume = _find_costume(rec["costume_id"], costumes)
+        if not costume:
+            continue
+        secondary_cards.append({
+            **_costume_card_fields(costume),
+            "tag": rec.get("tag", ""),
+            "reason": rec.get("reason", ""),
+        })
+
+    return AdvisorResponse(
+        status="ok",
+        curator_quote=result.get("curator_quote", ""),
+        source_image_data_url=_to_data_url(image_bytes, mime_type) if image_bytes else None,
+        source_label=source_label,
+        primary={
+            **_costume_card_fields(primary_costume),
+            "mapping": [
+                {"label": row["label"], "source_value": row["from"], "target_value": row["to"]}
+                for row in result["primary"]["mapping"]
+            ],
+        },
+        secondary=secondary_cards,
     )
 
 
