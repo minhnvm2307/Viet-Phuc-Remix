@@ -7,6 +7,7 @@ Facebook: oEmbed tokenless theo cập nhật của Meta (06/2026) — không g�
 """
 
 import logging
+import re
 from typing import Any, Dict, Optional, Tuple
 from urllib.parse import quote, urlparse
 
@@ -72,20 +73,45 @@ def _extract_tiktok(url: str) -> Dict[str, Any]:
         return {"status": "failed", "reason": "tiktok_unavailable"}
 
 
+def _scrape_og_image(url: str) -> Optional[str]:
+    """
+    Facebook's oembed_video chỉ trả về snippet <iframe> embed, KHÔNG BAO GIỜ có
+    thumbnail_url — nên cần lấy ảnh preview qua thẻ og:image trong HTML (dùng
+    User-Agent của chính Facebook's crawler để được server-render đầy đủ meta tag).
+    """
+    try:
+        response = requests.get(
+            url, headers={"User-Agent": "facebookexternalhit/1.1"}, timeout=10
+        )
+        if response.status_code != 200:
+            return None
+        match = re.search(r'<meta property="og:image" content="([^"]+)"', response.text)
+        return match.group(1) if match else None
+    except Exception as err:  # noqa: BLE001
+        logger.warning(f"[link_extractor] Scrape og:image Facebook lỗi: {err}")
+        return None
+
+
 def _extract_facebook(url: str) -> Dict[str, Any]:
+    caption = ""
+    thumbnail_url = None
+
     try:
         response = requests.get(f"{FACEBOOK_OEMBED_URL}?url={quote(url, safe='')}", timeout=10)
         if response.status_code == 200:
             data = response.json()
-            return {
-                "status": "ok",
-                "thumbnail_url": data.get("thumbnail_url"),
-                "caption": data.get("title", ""),
-            }
+            thumbnail_url = data.get("thumbnail_url")
+            caption = data.get("title", "")
     except Exception as err:  # noqa: BLE001
         logger.warning(f"[link_extractor] Facebook oEmbed lỗi: {err}")
 
-    return {"status": "failed", "reason": "facebook_unavailable"}
+    if not thumbnail_url:
+        thumbnail_url = _scrape_og_image(url)
+
+    if not thumbnail_url:
+        return {"status": "failed", "reason": "facebook_unavailable"}
+
+    return {"status": "ok", "thumbnail_url": thumbnail_url, "caption": caption}
 
 
 def extract_from_url(url: str) -> Dict[str, Any]:

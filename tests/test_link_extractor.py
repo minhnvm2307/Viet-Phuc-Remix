@@ -60,6 +60,32 @@ class TestExtractFromUrl(unittest.TestCase):
         result = link_extractor.extract_from_url("https://www.facebook.com/watch/?v=999")
         self.assertEqual(result, {"status": "failed", "reason": "facebook_unavailable"})
 
+    @patch("app.services.link_extractor.requests.get")
+    def test_facebook_oembed_without_thumbnail_falls_back_to_og_image_scrape(self, mock_get):
+        # Facebook's oembed_video product returns 200 but NEVER includes thumbnail_url
+        # (it only returns an <iframe> embed snippet) — must fall back to scraping the
+        # page's og:image meta tag instead of silently treating this as success.
+        oembed_response = MagicMock(status_code=200, json=lambda: {"title": "Reel vui"})
+        scrape_response = MagicMock(
+            status_code=200,
+            text='<meta property="og:image" content="https://scontent.fb/preview.jpg" />',
+        )
+        mock_get.side_effect = [oembed_response, scrape_response]
+
+        result = link_extractor.extract_from_url("https://www.facebook.com/reel/123456/")
+
+        self.assertEqual(result, {"status": "ok", "thumbnail_url": "https://scontent.fb/preview.jpg", "caption": "Reel vui"})
+
+    @patch("app.services.link_extractor.requests.get")
+    def test_facebook_oembed_and_og_image_scrape_both_fail(self, mock_get):
+        oembed_response = MagicMock(status_code=200, json=lambda: {"title": "Reel vui"})
+        scrape_response = MagicMock(status_code=200, text="<html><body>no og tags here</body></html>")
+        mock_get.side_effect = [oembed_response, scrape_response]
+
+        result = link_extractor.extract_from_url("https://www.facebook.com/reel/123456/")
+
+        self.assertEqual(result, {"status": "failed", "reason": "facebook_unavailable"})
+
     def test_unsupported_platform(self):
         result = link_extractor.extract_from_url("https://www.instagram.com/p/abc123/")
         self.assertEqual(result, {"status": "failed", "reason": "unsupported_platform"})
