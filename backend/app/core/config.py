@@ -49,6 +49,8 @@ class Settings(BaseModel):
     CATALOG_PATH: Path = CATALOG_PATH
     GEMINI_API_KEYS: list[str] = Field(default_factory=_load_gemini_keys)
     GEMINI_TEXT_MODEL: str = os.getenv("GEMINI_TEXT_MODEL", "gemini-2.5-flash")
+    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+    OPENROUTER_IMAGE_MODEL: str = os.getenv("OPENROUTER_IMAGE_MODEL", "google/gemini-2.5-flash-image")
 
 
 settings = Settings()

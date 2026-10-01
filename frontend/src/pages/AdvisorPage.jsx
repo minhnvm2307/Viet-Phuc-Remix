@@ -185,7 +185,7 @@ export default function AdvisorPage({ onRequireAuth }) {
 
               {!showUploadFallback && (
                 <div className="advisor-freetext-group">
-                  <span className="advisor-group-label">LINK TIKTOK / FACEBOOK</span>
+                  <span className="advisor-group-label">LINK TIKTOK</span>
                   {trendUrl ? (
                     <div className="advisor-link-preview">
                       <div className="advisor-link-preview-text">
@@ -201,7 +201,7 @@ export default function AdvisorPage({ onRequireAuth }) {
                       className="advisor-textarea"
                       value={trendUrl}
                       onChange={(e) => setTrendUrl(e.target.value)}
-                      placeholder="Dán link video/bài viết bạn thấy đang trend"
+                      placeholder="Dán link video TikTok bạn thấy đang trend"
                     />
                   )}
                   <button type="button" className="advisor-inline-link-btn" onClick={() => setShowUploadFallback(true)}>
@@ -372,7 +372,7 @@ export default function AdvisorPage({ onRequireAuth }) {
               </div>
               <div className="advisor-empty-explainer-card">
                 <h4>II. Cảm Hứng</h4>
-                <p>Dán link TikTok hoặc Facebook — màu sắc, phom dáng, vibe được ánh xạ sang Việt phục.</p>
+                <p>Dán link video TikTok — màu sắc, phom dáng, vibe được ánh xạ sang Việt phục.</p>
                 <div className="advisor-empty-explainer-img" />
               </div>
             </div>

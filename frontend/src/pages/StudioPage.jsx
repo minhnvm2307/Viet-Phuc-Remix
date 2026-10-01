@@ -381,7 +381,8 @@ export default function StudioPage({
           color: selectedColor,
           accessories: selectedAccList.map((a) => ({ id: a.id, name: a.name, category: a.category })),
           user_prompt: currentPrompt,
-          has_user_photo: !!userPhoto
+          has_user_photo: !!userPhoto,
+          user_photo_data_url: userPhoto || null
         })
       });
 

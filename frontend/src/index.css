@@ -3197,17 +3197,17 @@ nav button.active {
 
 .advisor-studio-layout {
   display: grid;
-  grid-template-columns: 440px 1fr;
-  max-width: 1280px;
+  grid-template-columns: 560px 1fr;
+  max-width: 1440px;
   margin: 0 auto;
 }
 
 .advisor-sidebar {
   border-right: 1px solid #E5E0D8;
-  padding: 56px 48px 56px 56px;
+  padding: 36px 48px 36px 56px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 22px;
 }
 
 .advisor-sidebar-kicker-wrap {
@@ -3246,9 +3246,9 @@ nav button.active {
 .advisor-form-section {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 16px;
   border-top: 1px solid #1C1B18;
-  padding-top: 22px;
+  padding-top: 18px;
 }
 
 .advisor-section-header {
@@ -3579,6 +3579,16 @@ nav button.active {
 
 .advisor-primary-media.no-source {
   grid-template-columns: 1fr;
+}
+
+/* Không có ảnh cảm hứng -> chỉ 1 ảnh costume, giới hạn kích thước lại thay vì
+   kéo full-width ở tỉ lệ 9:16 (phình rất to) — tỉ lệ 3:4 giống thẻ phụ. */
+.advisor-primary-media.no-source .advisor-media-box {
+  max-width: 220px;
+}
+
+.advisor-primary-media.no-source .advisor-media-frame {
+  aspect-ratio: 3 / 4;
 }
 
 .advisor-media-box {

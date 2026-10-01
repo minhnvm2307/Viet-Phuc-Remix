@@ -1,6 +1,6 @@
 """
 advisor_combined.py - Gợi ý phối đồ hợp nhất: bối cảnh (sự kiện/thời tiết/phong cách)
-VÀ/HOẶC 1 ảnh cảm hứng (trend TikTok/Facebook hoặc ảnh chụp màn hình) trong CÙNG
+VÀ/HOẶC 1 ảnh cảm hứng (trend TikTok hoặc ảnh chụp màn hình) trong CÙNG
 một lần gọi Gemini, trả về 1 gợi ý chính (có bảng ánh xạ tông màu/phom dáng/vibe
 khi có ảnh) kèm tối đa 2 gợi ý phụ.
 Dự án: Việt Phục Remix (VietStyle AI)

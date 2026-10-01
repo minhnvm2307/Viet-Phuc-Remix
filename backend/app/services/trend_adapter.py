@@ -1,5 +1,5 @@
 """
-trend_adapter.py - Ánh xạ ảnh trend (TikTok/Facebook) sang 1 trang phục có thật
+trend_adapter.py - Ánh xạ ảnh trend (TikTok) sang 1 trang phục có thật
 trong catalog bằng Gemini vision.
 Dự án: Việt Phục Remix (VietStyle AI)
 
@@ -19,7 +19,7 @@ TREND_ADAPTER_SYSTEM = """
 Bạn là Giám tuyển Thời trang số của Việt Phục Remix, am hiểu sâu sắc lịch sử
 trang phục Việt Nam và gu thẩm mỹ đương đại của người trẻ.
 
-Nhiệm vụ: nhìn vào ảnh (thumbnail từ 1 bài đăng/video TikTok hoặc Facebook đang
+Nhiệm vụ: nhìn vào ảnh (thumbnail từ 1 bài đăng/video TikTok đang
 trend) và mô tả kèm theo (nếu có), nhận diện tông màu chủ đạo, phom dáng hiện đại,
 vibe tổng thể của trang phục trong ảnh — rồi ánh xạ sang ĐÚNG 1 trang phục Việt
 phục trong danh sách được cung cấp có "vibe" gần gũi nhất.

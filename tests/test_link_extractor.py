@@ -41,50 +41,13 @@ class TestExtractFromUrl(unittest.TestCase):
 
         self.assertEqual(result, {"status": "failed", "reason": "tiktok_unavailable"})
 
-    @patch("app.services.link_extractor.requests.get")
-    def test_facebook_tokenless_oembed_success(self, mock_get):
-        mock_get.return_value = MagicMock(
-            status_code=200,
-            json=lambda: {"thumbnail_url": "https://scontent.fb/thumb.jpg", "title": "ao dai post"},
-        )
+    def test_facebook_is_no_longer_supported(self):
         result = link_extractor.extract_from_url("https://www.facebook.com/watch/?v=123456")
+        self.assertEqual(result, {"status": "failed", "reason": "unsupported_platform"})
 
-        self.assertEqual(result["status"], "ok")
-        called_url = mock_get.call_args.args[0]
-        self.assertIn("graph.facebook.com", called_url)
-        self.assertNotIn("access_token", called_url)
-
-    @patch("app.services.link_extractor.requests.get")
-    def test_facebook_oembed_failure(self, mock_get):
-        mock_get.return_value = MagicMock(status_code=400, json=lambda: {})
-        result = link_extractor.extract_from_url("https://www.facebook.com/watch/?v=999")
-        self.assertEqual(result, {"status": "failed", "reason": "facebook_unavailable"})
-
-    @patch("app.services.link_extractor.requests.get")
-    def test_facebook_oembed_without_thumbnail_falls_back_to_og_image_scrape(self, mock_get):
-        # Facebook's oembed_video product returns 200 but NEVER includes thumbnail_url
-        # (it only returns an <iframe> embed snippet) — must fall back to scraping the
-        # page's og:image meta tag instead of silently treating this as success.
-        oembed_response = MagicMock(status_code=200, json=lambda: {"title": "Reel vui"})
-        scrape_response = MagicMock(
-            status_code=200,
-            text='<meta property="og:image" content="https://scontent.fb/preview.jpg" />',
-        )
-        mock_get.side_effect = [oembed_response, scrape_response]
-
-        result = link_extractor.extract_from_url("https://www.facebook.com/reel/123456/")
-
-        self.assertEqual(result, {"status": "ok", "thumbnail_url": "https://scontent.fb/preview.jpg", "caption": "Reel vui"})
-
-    @patch("app.services.link_extractor.requests.get")
-    def test_facebook_oembed_and_og_image_scrape_both_fail(self, mock_get):
-        oembed_response = MagicMock(status_code=200, json=lambda: {"title": "Reel vui"})
-        scrape_response = MagicMock(status_code=200, text="<html><body>no og tags here</body></html>")
-        mock_get.side_effect = [oembed_response, scrape_response]
-
-        result = link_extractor.extract_from_url("https://www.facebook.com/reel/123456/")
-
-        self.assertEqual(result, {"status": "failed", "reason": "facebook_unavailable"})
+    def test_fb_watch_is_no_longer_supported(self):
+        result = link_extractor.extract_from_url("https://fb.watch/abc123/")
+        self.assertEqual(result, {"status": "failed", "reason": "unsupported_platform"})
 
     def test_unsupported_platform(self):
         result = link_extractor.extract_from_url("https://www.instagram.com/p/abc123/")
@@ -106,14 +69,6 @@ class TestExtractFromUrl(unittest.TestCase):
     def test_malformed_url_does_not_crash(self):
         result = link_extractor.extract_from_url("http://[tiktok.com")
         self.assertEqual(result, {"status": "failed", "reason": "unsupported_platform"})
-
-    @patch("app.services.link_extractor.requests.get")
-    def test_fb_watch_domain_accepted(self, mock_get):
-        mock_get.return_value = MagicMock(
-            status_code=200, json=lambda: {"thumbnail_url": "https://scontent.fb/thumb.jpg", "title": "t"}
-        )
-        result = link_extractor.extract_from_url("https://fb.watch/abc123/")
-        self.assertEqual(result["status"], "ok")
 
     @patch("app.services.link_extractor.YoutubeDL")
     @patch("app.services.link_extractor.requests.get")

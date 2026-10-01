@@ -6,7 +6,7 @@ from backend.app.core.database import Base
 
 class SourceImage(Base):
     """
-    Ảnh nguồn người dùng đã lưu (vd trích xuất từ trend TikTok/Facebook) để
+    Ảnh nguồn người dùng đã lưu (vd trích xuất từ trend TikTok) để
     dùng lại làm ảnh ghép trong Studio ở những lần phối đồ sau.
     """
     __tablename__ = "source_images"

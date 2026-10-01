@@ -4,6 +4,8 @@ heritage.py - Router quản lý danh mục và thông tin di sản phục trang
 
 import base64
 import json
+import logging
+import mimetypes
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 from pydantic import BaseModel
@@ -28,9 +30,10 @@ from app.services.prompt_template import (
 )
 from app.services.cultural_guardrail import check_remix_request
 from app.services.curator_advisor import get_context_recommendations
-from app.services import link_extractor, trend_adapter, advisor_combined
+from app.services import link_extractor, trend_adapter, advisor_combined, image_remix
 
 router = APIRouter(prefix="/heritage", tags=["Heritage Catalog"])
+logger = logging.getLogger(__name__)
 
 class RemixGenerateRequest(BaseModel):
     costume_id: str
@@ -39,6 +42,7 @@ class RemixGenerateRequest(BaseModel):
     accessories: Optional[List[Dict[str, Any]]] = None
     user_prompt: Optional[str] = None
     has_user_photo: Optional[bool] = False
+    user_photo_data_url: Optional[str] = None
 
 class RemixGenerateResponse(BaseModel):
     success: bool
@@ -46,6 +50,7 @@ class RemixGenerateResponse(BaseModel):
     stage_steps: List[str]
     output_images: List[str]
     guardrail: GuardrailResult = GuardrailResult()
+    generation_mode: str = "mock"
 
 
 
@@ -238,8 +243,28 @@ def generate_remix(req: RemixGenerateRequest):
         has_user_photo=req.has_user_photo or False
     )
 
-    # 2 ảnh phối AI sắc nét cho trang phục này
+    # 2 ảnh phối AI sắc nét cho trang phục này (mặc định: pipeline mock)
     output_images = get_costume_output_images(costume.get("id", ""))
+    generation_mode = "mock"
+
+    # Pipeline THẬT (OpenRouter + ảnh người dùng) — chỉ kích hoạt khi có key
+    # cấu hình VÀ client gửi kèm ảnh thật. Lỗi sinh ảnh thật rơi về mock,
+    # không làm hỏng trải nghiệm phối đồ.
+    if image_remix.is_configured() and req.has_user_photo and req.user_photo_data_url:
+        try:
+            costume_reference = _resolve_costume_reference_data_url(req.selected_image_url)
+            real_images = image_remix.generate_remix_images(
+                prompt=_master_prompt,
+                person_image_data_url=req.user_photo_data_url,
+                costume_image_data_url=costume_reference,
+                num_images=1,
+            )
+            # Chỉ sinh 1 ảnh thật (tiết kiệm ngân sách) — ảnh còn lại vẫn giữ
+            # nguyên bản mock đã chuẩn bị sẵn cho trang phục này.
+            output_images = real_images + output_images[len(real_images):]
+            generation_mode = "live"
+        except image_remix.ImageRemixUnavailableError as err:
+            logger.error(f"[remix] Sinh ảnh thật thất bại, dùng lại ảnh mock: {err}")
 
     return RemixGenerateResponse(
         success=True,
@@ -247,6 +272,7 @@ def generate_remix(req: RemixGenerateRequest):
         stage_steps=stage_steps,
         output_images=output_images,
         guardrail=guardrail,
+        generation_mode=generation_mode,
     )
 
 
@@ -281,6 +307,34 @@ def _to_data_url(image_bytes: bytes, mime_type: str) -> str:
     return f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode('ascii')}"
 
 
+def _resolve_costume_reference_data_url(selected_image_url: Optional[str]) -> Optional[str]:
+    """
+    Chuyển selected_image_url (data URL sẵn có, hoặc đường dẫn /static/... nội
+    bộ) thành data URL để gửi làm ảnh tham chiếu trang phục cho OpenRouter.
+    Ảnh tham chiếu là TÙY CHỌN (không chặn sinh ảnh) — trả None nếu là URL
+    ngoài hệ thống hoặc không đọc được file.
+    """
+    if not selected_image_url:
+        return None
+    if selected_image_url.startswith("data:"):
+        return selected_image_url
+    if not selected_image_url.startswith("/static/"):
+        return None
+
+    static_root = settings.STATIC_DIR.resolve()
+    file_path = (static_root / selected_image_url[len("/static/"):]).resolve()
+    try:
+        file_path.relative_to(static_root)
+    except ValueError:
+        logger.warning(f"[remix] selected_image_url path traversal bị chặn: {selected_image_url}")
+        return None
+    if not file_path.is_file():
+        return None
+
+    mime_type = mimetypes.guess_type(str(file_path))[0] or "image/jpeg"
+    return _to_data_url(file_path.read_bytes(), mime_type)
+
+
 _IMAGE_MAGIC_BYTES = (
     b"\xff\xd8\xff",  # JPEG
     b"\x89PNG\r\n\x1a\n",  # PNG
@@ -299,7 +353,7 @@ def _looks_like_image(data: bytes) -> bool:
 @router.post("/trend-extract", response_model=TrendExtractResponse)
 def trend_extract(req: TrendExtractRequest):
     """
-    Trích xuất trend từ 1 link TikTok/Facebook cụ thể và ánh xạ sang 1 trang phục
+    Trích xuất trend từ 1 link TikTok cụ thể và ánh xạ sang 1 trang phục
     có thật trong catalog bằng Gemini vision. Không lưu DB, không yêu cầu đăng nhập.
     """
     extraction = link_extractor.extract_from_url(req.source_url)
@@ -331,7 +385,7 @@ def trend_extract(req: TrendExtractRequest):
 @router.post("/trend-extract-upload", response_model=TrendExtractResponse)
 def trend_extract_upload(screenshot: UploadFile = File(...)):
     """
-    Phương án dự phòng khi link TikTok/Facebook không trích xuất được: người dùng
+    Phương án dự phòng khi link TikTok không trích xuất được: người dùng
     tải lên ảnh chụp màn hình thay thế, vẫn qua cùng pipeline phân tích Gemini vision.
 
     Định nghĩa `def` thường (không async): trend_adapter.analyze_trend_image là lệnh
