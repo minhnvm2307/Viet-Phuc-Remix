@@ -3,9 +3,11 @@ main.py - FastAPI Application Entry Point
 Dự án: Việt Phục Remix (VietStyle AI)
 """
 
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.core.database import init_db
 from app.routers import heritage, auth, lookbook, source_images
@@ -49,10 +51,15 @@ def health_check():
     }
 
 
-@app.get("/")
-def root():
-    return {
-        "message": "Chào mừng đến với API Việt Phục Remix",
-        "docs_url": "/docs",
-        "catalog_api": "/api/heritage/costumes"
-    }
+# Phục vụ frontend React đã build (sản xuất/production) — nếu có.
+# Trong môi trường dev, frontend chạy riêng qua Vite (npm run dev), thư mục
+# dist/ không tồn tại nên phần này tự động bỏ qua, không ảnh hưởng gì.
+FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="frontend-assets")
+
+    @app.get("/{full_path:path}")
+    def serve_frontend(full_path: str):
+        """Catch-all cho React Router (client-side routing) — luôn trả index.html."""
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
