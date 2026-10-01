@@ -192,8 +192,8 @@ def get_costume_output_images(costume_id: str) -> List[str]:
         ]
     if "giao-linh" in id_lower:
         return [
-            "/static/seeds/images/ao-giao-linh-remix-opt1.jpg",
-            "/static/seeds/images/ao-giao-linh-remix-opt2.jpg"
+            "/static/seeds/images/ao-giao-linh-remix.jpg",
+            "/static/seeds/images/ao-vien-linh-remix.jpg"
         ]
     if "nhat-binh" in id_lower:
         return [

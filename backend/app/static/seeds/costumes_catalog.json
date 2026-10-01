@@ -139,7 +139,7 @@
       "gallery": [
         "/static/costumes/ly_tran/tran_quan_vien.jpg",
         "/static/seeds/images/ao-giao-linh-gallery-1.png",
-        "/static/seeds/images/ao-giao-linh-gallery-2.jpg"
+        "/static/seeds/images/ao-giao-linh-gallery-2.png"
       ],
       "remix_image": "/static/seeds/images/ao-giao-linh-remix.jpg",
       "cutout_image": "/static/costumes/ly_tran/tran_quan_vien.jpg"
@@ -177,9 +177,10 @@
         "formula": "Áo Viên Lĩnh rút ngắn vạt (dáng tunic lửng) + Quần lụa ống suông đồng màu + Kiềng bạc chạm khắc mỏng + Túi xách da thủ công.",
         "suitable_for": "Sự kiện thời trang, dạ tiệc cao cấp mang phong cách Á Đông hiện đại."
       },
-      "cover_image": "/static/seeds/images/ao-vien-linh-cover.jpg",
+      "cover_image": "/static/seeds/images/ao-vien-linh-cover.png",
       "gallery": [
-        "/static/seeds/images/ao-vien-linh-gallery-1.jpg"
+        "/static/seeds/images/ao-vien-linh-gallery-1.jpg",
+        "/static/seeds/images/ao-vien-linh-gallery-2.png"
       ],
       "remix_image": "/static/seeds/images/ao-vien-linh-remix.jpg",
       "cutout_image": "/static/seeds/cutouts/costumes/le-official-vien-linh.png"
@@ -217,10 +218,12 @@
         "formula": "Áo Tấc gấm đỏ son thêu hoa văn ẩn + Quần culottes trắng kem + Vòng cổ ngọc trai nhiều tầng + Giày mule cao gót nhung mũi nhọn.",
         "suitable_for": "Lễ cưới hiện đại, chụp ảnh lookbook kỷ yếu, đại tiệc ngoại giao văn hóa."
       },
-      "cover_image": "/static/seeds/images/ao-tac-cover.jpeg",
+      "cover_image": "/static/seeds/images/ao-tac-cover.png",
       "gallery": [
-        "/static/seeds/images/ao-tac-cover.jpeg",
-        "/static/seeds/images/ao-tac-gallery-1.jpg"
+        "/static/seeds/images/ao-tac-cover.png",
+        "/static/seeds/images/ao-tac-gallery-1.jpg",
+        "/static/seeds/images/ao-tac-gallery-2.jpeg",
+        "/static/seeds/images/ao-tac-gallery-3.jpg"
       ],
       "remix_image": "/static/seeds/images/ao-tac-remix.jpg",
       "cutout_image": "/static/seeds/cutouts/costumes/nguyen-official-ao-tac.png"
@@ -340,7 +343,7 @@
         "formula": "Áo Yếm lụa tơ tằm thêu hoa sen tối giản + Áo khoác Tứ Thân vải đũi mộc buông tà + Chân váy xếp ly lụa xòe dài + Guốc mộc quai da hiện đại.",
         "suitable_for": "Lễ hội âm nhạc mùa hè, du lịch cố đô, dã ngoại làng cổ Đường Lâm."
       },
-      "cover_image": "/static/seeds/images/ao-tu-than-cover.jpg",
+      "cover_image": "/static/seeds/images/ao-tu-than-cover.png",
       "gallery": [
         "/static/seeds/images/ao-tu-than-gallery-1.jpg",
         "/static/seeds/images/ao-tu-than-gallery-2.jpg"
@@ -381,12 +384,12 @@
         "formula": "Áo Bà Ba lụa tơ pastel form rộng phóng khoáng + Quần Jean ống rộng cạp cao + Túi cói lục bình đan thủ công + Khăn rằn vắt hờ trên vai.",
         "suitable_for": "Du lịch sinh thái, picnic cuối tuần, phong cách thời trang nghỉ dưỡng Resort Wear."
       },
-      "cover_image": "/static/seeds/images/ao-ba-ba-cover.jpg",
+      "cover_image": "/static/seeds/images/ao-ba-ba-cover.png",
       "gallery": [
-        "/static/seeds/images/ao-ba-ba-cover.jpg",
+        "/static/seeds/images/ao-ba-ba-cover.png",
         "/static/seeds/images/ao-ba-ba-gallery-1.jpg"
       ],
-      "remix_image": "/static/seeds/images/ao-ba-ba-cover.jpg",
+      "remix_image": "/static/seeds/images/ao-ba-ba-cover.png",
       "cutout_image": "/static/seeds/cutouts/costumes/21st-ao-ba-ba-non-la.png"
     },
     {
@@ -584,12 +587,13 @@
         "formula": "Áo Khóm lụa trắng cài cúc bướm bạc dáng crop-top + Quần tây ống suông cạp cao màu than chì + Khăn Piêu quàng cổ kiểu khăn lụa Twilly Pháp + Giày cao gót mũi nhọn.",
         "suitable_for": "Sự kiện thời trang dạ tiệc, tuần lễ thời trang Việt Nam, chụp ảnh Lookbook hiện đại."
       },
-      "cover_image": "/static/seeds/images/trang-phuc-thai-den-cover.jpg",
+      "cover_image": "/static/seeds/images/trang-phuc-thai-cover.png",
       "gallery": [
-        "/static/seeds/images/trang-phuc-thai-den-cover.jpg"
+        "/static/seeds/images/trang-phuc-thai-cover.png",
+        "/static/seeds/images/trang-phuc-thai-gallery-1.jpg"
       ],
       "remix_image": "/static/seeds/images/trang-phuc-thai-den-remix.jpg",
-      "cutout_image": "/static/seeds/images/trang-phuc-thai-den-cover.jpg"
+      "cutout_image": "/static/seeds/images/trang-phuc-thai-cover.png"
     },
     {
       "id": "ly-hoang-thai-hau",
