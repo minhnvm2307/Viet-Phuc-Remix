@@ -22,6 +22,7 @@ _client_cache: Dict[str, "genai.Client"] = {}
 
 
 def _get_client(api_key: str) -> "genai.Client":
+    api_key = api_key.strip("'\" \t\r\n")
     if api_key not in _client_cache:
         _client_cache[api_key] = genai.Client(api_key=api_key)
     return _client_cache[api_key]

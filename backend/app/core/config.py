@@ -3,6 +3,7 @@ config.py - Cấu hình hệ thống Backend Việt Phục Remix
 """
 
 import os
+from typing import Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -18,15 +19,27 @@ CATALOG_PATH = SEEDS_DIR / "costumes_catalog.json"
 load_dotenv(REPO_ROOT / ".env")
 
 
+def _clean_val(val: Optional[str]) -> str:
+    """Loại bỏ khoảng trắng, dấu ngoặc đơn/kép và comment nội dòng sinh ra từ docker --env-file."""
+    if not val:
+        return ""
+    val = val.strip()
+    if " #" in val:
+        val = val.split(" #", 1)[0].strip()
+    if (val.startswith("'") and val.endswith("'")) or (val.startswith('"') and val.endswith('"')):
+        val = val[1:-1].strip()
+    return val
+
+
 def _load_gemini_keys() -> list[str]:
     """Đọc toàn bộ GOOGLE_API_KEY, GOOGLE_API_KEY_2, GOOGLE_API_KEY_3... để xoay vòng."""
     keys: list[str] = []
-    first = os.getenv("GOOGLE_API_KEY")
+    first = _clean_val(os.getenv("GOOGLE_API_KEY"))
     if first:
         keys.append(first)
     idx = 2
     while True:
-        key = os.getenv(f"GOOGLE_API_KEY_{idx}")
+        key = _clean_val(os.getenv(f"GOOGLE_API_KEY_{idx}"))
         if not key:
             break
         keys.append(key)
@@ -48,9 +61,9 @@ class Settings(BaseModel):
     STATIC_DIR: Path = STATIC_DIR
     CATALOG_PATH: Path = CATALOG_PATH
     GEMINI_API_KEYS: list[str] = Field(default_factory=_load_gemini_keys)
-    GEMINI_TEXT_MODEL: str = os.getenv("GEMINI_TEXT_MODEL", "gemini-2.5-flash")
-    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
-    OPENROUTER_IMAGE_MODEL: str = os.getenv("OPENROUTER_IMAGE_MODEL", "google/gemini-2.5-flash-image")
+    GEMINI_TEXT_MODEL: str = _clean_val(os.getenv("GEMINI_TEXT_MODEL", "gemini-2.5-flash"))
+    OPENROUTER_API_KEY: str = _clean_val(os.getenv("OPENROUTER_API_KEY", ""))
+    OPENROUTER_IMAGE_MODEL: str = _clean_val(os.getenv("OPENROUTER_IMAGE_MODEL", "google/gemini-2.5-flash-image"))
 
 
 settings = Settings()
