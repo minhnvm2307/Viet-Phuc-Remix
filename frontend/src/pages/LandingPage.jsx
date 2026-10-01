@@ -408,10 +408,9 @@ export default function LandingPage({ onStartStudio }) {
                   {/* Simulated Extracted Result Card */}
                   <div className="mockup-extract-box">
                     <img
-                      src="/static/seeds/images/ao-giao-linh-remix-opt2.jpg"
-                      alt="Cổ phục đề xuất"
+                      src="/static/seeds/landing-page-tiktok.png"
+                      alt="Ảnh video TikTok thời trang"
                       className="mockup-extract-img"
-                      onError={(e) => { e.target.src = '/static/seeds/landing-page-tiktok.png'; }}
                     />
                     <div className="mockup-extract-info">
                       <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
