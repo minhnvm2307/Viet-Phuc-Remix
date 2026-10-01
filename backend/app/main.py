@@ -9,7 +9,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.core.config import settings
-from app.core.database import init_db
+# Dùng init_db từ namespace backend.app.core.database — đây chính là namespace mà
+# User/Lookbook/SourceImage models thực sự đăng ký Base.metadata vào (qua
+# backend/app/routers/auth.py, lookbook.py, source_images.py đều import kiểu
+# `from backend.app...`). Gọi init_db() của namespace app.core.database (không có
+# tiền tố backend.) sẽ tạo bảng trên 1 metadata rỗng khác — không bảng nào được tạo
+# thật, và gây lỗi "no such table: users" ngay lần đăng ký/đăng nhập đầu tiên trên
+# 1 database trống (vd container mới triển khai).
+from backend.app.core.database import init_db
 from app.routers import heritage, auth, lookbook, source_images
 
 # Khởi tạo bảng cơ sở dữ liệu
