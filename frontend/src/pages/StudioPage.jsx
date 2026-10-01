@@ -471,26 +471,26 @@ export default function StudioPage({
     }
     if (selectedCostume?.id === 'ao-giao-linh') {
       return [
-        '/static/seeds/images/ao-giao-linh-remix.jpg',
-        '/static/seeds/images/ao-giao-linh-gallery-1.png'
+        '/static/seeds/images/ao-giao-linh-remix-opt1.jpg',
+        '/static/seeds/images/ao-giao-linh-remix-opt2.jpg'
       ];
     }
     if (selectedCostume?.id === 'ao-nhat-binh') {
       return [
         '/static/seeds/images/ao-nhat-binh-remix.jpg',
-        '/static/seeds/images/ao-nhat-binh-gallery-1.jpg'
+        '/static/seeds/images/ao-tac-remix.jpg'
       ];
     }
     if (selectedCostume?.id === 'ao-tu-than') {
       return [
         '/static/seeds/images/ao-tu-than-remix.jpg',
-        '/static/seeds/images/ao-tu-than-gallery-1.jpg'
+        '/static/seeds/images/trang-phuc-thai-den-remix.jpg'
       ];
     }
     if (selectedCostume?.id === 'ao-dai-lemur-le-pho') {
       return [
         '/static/seeds/images/ao-dai-lemur-le-pho-remix.jpg',
-        '/static/seeds/images/ao-dai-lemur-le-pho-cover.png'
+        '/static/seeds/images/ao-ngu-than-tay-chen-remix.jpg'
       ];
     }
     return [

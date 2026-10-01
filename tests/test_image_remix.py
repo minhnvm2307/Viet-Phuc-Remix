@@ -92,5 +92,34 @@ class TestGenerateRemixImages(unittest.TestCase):
         self.assertEqual(mock_post.call_count, 2)
 
 
+class TestSplitDiptychImage(unittest.TestCase):
+    def test_split_synthetic_image(self):
+        import base64
+        import io
+        from PIL import Image
+
+        # Create a simple 200x100 synthetic image
+        img = Image.new("RGB", (200, 100), color="blue")
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        data_url = f"data:image/jpeg;base64,{base64.b64encode(buf.getvalue()).decode()}"
+
+        results = image_remix.split_diptych_image(data_url)
+        self.assertEqual(len(results), 2)
+        self.assertTrue(results[0].startswith("data:image/jpeg;base64,"))
+        self.assertTrue(results[1].startswith("data:image/jpeg;base64,"))
+
+        # Check that cropped images have width 100
+        for opt in results:
+            raw = base64.b64decode(opt.split(",")[1])
+            part = Image.open(io.BytesIO(raw))
+            self.assertEqual(part.size, (100, 100))
+
+    def test_split_empty_or_invalid_returns_original(self):
+        self.assertEqual(image_remix.split_diptych_image(""), [""])
+        self.assertEqual(image_remix.split_diptych_image("not-an-image"), ["not-an-image"])
+
+
 if __name__ == "__main__":
     unittest.main()
+

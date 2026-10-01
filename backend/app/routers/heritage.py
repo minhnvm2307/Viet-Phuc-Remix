@@ -259,9 +259,17 @@ def generate_remix(req: RemixGenerateRequest):
                 costume_image_data_url=costume_reference,
                 num_images=1,
             )
-            # Chỉ sinh 1 ảnh thật (tiết kiệm ngân sách) — ảnh còn lại vẫn giữ
-            # nguyên bản mock đã chuẩn bị sẵn cho trang phục này.
-            output_images = real_images + output_images[len(real_images):]
+            # Tự động cắt đôi ảnh gen chứa 2 option (side-by-side) thành 2 Option riêng biệt:
+            # - Option 1: Nửa trái (phom dáng truyền thống / studio)
+            # - Option 2: Nửa phải (phong cách hiện đại / streetwear)
+            if real_images and len(real_images) == 1:
+                split_options = image_remix.split_diptych_image(real_images[0])
+                if len(split_options) == 2:
+                    output_images = split_options
+                else:
+                    output_images = real_images + output_images[len(real_images):]
+            elif real_images and len(real_images) >= 2:
+                output_images = real_images[:2]
             generation_mode = "live"
         except image_remix.ImageRemixUnavailableError as err:
             logger.error(f"[remix] Sinh ảnh thật thất bại, dùng lại ảnh mock: {err}")

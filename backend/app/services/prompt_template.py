@@ -142,7 +142,9 @@ THÔNG SỐ PHỐI ĐỒ CHI TIẾT:
 YÊU CẦU BỐ CỤC:
 - Khung hình thời trang hoàn chỉnh (Full view portrait / 3:4 aspect ratio).
 - Phô diễn trọn vẹn tà áo đúng cấu trúc đã nêu ở mục "CẤU TRÚC VẠT ÁO", không bị crop mất phần mũ nón hay tà dưới.
-- Tạo ra 2 góc độ tạo dáng nghệ thuật phản ánh đúng vẻ đẹp giao thoa giữa di sản và hiện đại.
+- Tạo ra 2 bản phối tạo dáng nghệ thuật song song (bố cục chia đôi rõ nét theo trục dọc):
+  + Bản phối 1 (nửa bên trái): Phom dáng chuẩn mực, ánh sáng studio sang trọng, thanh lịch.
+  + Bản phối 2 (nửa bên phải): Phối đồ đương đại phá cách (streetwear, quần jean hoặc blazer, bối cảnh hiện đại).
 """
     return full_prompt.strip()
 
@@ -190,23 +192,23 @@ def get_costume_output_images(costume_id: str) -> List[str]:
         ]
     if "giao-linh" in id_lower:
         return [
-            "/static/seeds/images/ao-giao-linh-remix.jpg",
-            "/static/seeds/images/ao-giao-linh-gallery-1.png"
+            "/static/seeds/images/ao-giao-linh-remix-opt1.jpg",
+            "/static/seeds/images/ao-giao-linh-remix-opt2.jpg"
         ]
     if "nhat-binh" in id_lower:
         return [
             "/static/seeds/images/ao-nhat-binh-remix.jpg",
-            "/static/seeds/images/ao-nhat-binh-gallery-1.jpg"
+            "/static/seeds/images/ao-tac-remix.jpg"
         ]
     if "tu-than" in id_lower:
         return [
             "/static/seeds/images/ao-tu-than-remix.jpg",
-            "/static/seeds/images/ao-tu-than-gallery-1.jpg"
+            "/static/seeds/images/trang-phuc-thai-den-remix.jpg"
         ]
     if "lemur" in id_lower:
         return [
             "/static/seeds/images/ao-dai-lemur-le-pho-remix.jpg",
-            "/static/seeds/images/ao-dai-lemur-le-pho-cover.png"
+            "/static/seeds/images/ao-ngu-than-tay-chen-remix.jpg"
         ]
     if "vien-linh" in id_lower:
         return [
