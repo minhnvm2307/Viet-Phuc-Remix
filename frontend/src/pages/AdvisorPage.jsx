@@ -1,33 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// Trang "Gợi Ý Theo Bối Cảnh" — điểm vào chính cho Curator Advisor + Trend Extractor.
-// Dựng theo đúng ngôn ngữ thiết kế của trang chủ (hero + kicker badge + pillars)
-// để đủ trọng lượng thị giác, không phải 1 component nhỏ lọt thỏm. Không icon,
-// copy ngắn gọn trên nút — đúng tinh thần DESIGN.md.
+// Trang "Gợi Ý Phối Đồ" — 1 form duy nhất gộp Bối cảnh + Cảm hứng, theo đúng
+// bố cục 2 cột trong mockup Claude Design. Không icon, copy ngắn gọn.
 
-const OCCASION_OPTIONS = ['Đi học, đi làm', 'Dạo phố, cà phê', 'Dạ tiệc', 'Lễ hội', 'Cưới hỏi', 'Chụp lookbook'];
+const OCCASION_OPTIONS = ['Đi học', 'Dạo phố', 'Dạ tiệc', 'Lễ hội', 'Cưới hỏi', 'Chụp lookbook'];
 const WEATHER_OPTIONS = ['Nóng', 'Mát', 'Lạnh', 'Mưa'];
 const VIBE_OPTIONS = ['Thanh lịch', 'Cá tính', 'Mộc mạc', 'Sang trọng', 'Phá cách'];
 
-const HOW_IT_WORKS = [
-  {
-    number: '01',
-    title: 'Chọn Cách Bắt Đầu',
-    desc: 'Mô tả sự kiện, thời tiết, phong cách bạn muốn — hoặc dán 1 link TikTok/Facebook bạn vừa thấy đang trend.'
-  },
-  {
-    number: '02',
-    title: 'Giám Tuyển Phân Tích',
-    desc: 'Gemini AI đối chiếu với kho di sản, chọn ra trang phục Việt phục phù hợp nhất và giải thích lý do.'
-  },
-  {
-    number: '03',
-    title: 'Phối Đồ Ngay',
-    desc: 'Nhận gợi ý kèm ảnh, chuyển thẳng sang Studio để thử phối — ảnh trend có thể lưu lại dùng cho lần sau.'
-  }
-];
+const PLACEHOLDER_QUOTE =
+  'Hãy cho tôi biết dịp bạn sẽ mặc. Nếu có một khoảnh khắc bạn thích, gửi kèm — tôi sẽ tìm bộ cổ phục cùng tinh thần.';
 
 function ChipGroup({ label, options, value, onChange }) {
   return (
@@ -52,99 +35,29 @@ function ChipGroup({ label, options, value, onChange }) {
 export default function AdvisorPage({ onRequireAuth }) {
   const navigate = useNavigate();
   const { isAuthenticated, token } = useAuth();
-  const [costumes, setCostumes] = useState([]);
-  const [activeTab, setActiveTab] = useState('context');
 
   const [occasion, setOccasion] = useState(null);
   const [weather, setWeather] = useState(null);
   const [vibe, setVibe] = useState(null);
   const [freeText, setFreeText] = useState('');
+  const [trendUrl, setTrendUrl] = useState('');
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadPreviewUrl, setUploadPreviewUrl] = useState(null);
+  const [showUploadFallback, setShowUploadFallback] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [result, setResult] = useState(null);
-
-  const [trendUrl, setTrendUrl] = useState('');
-  const [isTrendLoading, setIsTrendLoading] = useState(false);
-  const [trendError, setTrendError] = useState('');
-  const [trendResult, setTrendResult] = useState(null);
-  const [showUploadFallback, setShowUploadFallback] = useState(false);
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploadPreviewUrl, setUploadPreviewUrl] = useState(null);
   const [saveState, setSaveState] = useState('idle'); // idle | saving | saved | error
 
-  useEffect(() => {
-    fetch('/api/heritage/costumes')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.costumes) setCostumes(data.costumes);
-      })
-      .catch((err) => console.error('Lỗi tải danh mục trang phục:', err));
-  }, []);
+  const hasAnyInput = Boolean(occasion || weather || vibe || freeText.trim() || trendUrl.trim() || uploadFile);
 
-  const findCostume = (id) => costumes.find((c) => c.id === id);
+  const filterSummaryParts = [occasion, weather, vibe].filter(Boolean);
+  const extraInspirationCount = (trendUrl.trim() || uploadFile) ? 1 : 0;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMsg('');
-    setResult(null);
-    try {
-      const res = await fetch('/api/heritage/context-advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          occasion,
-          weather,
-          vibe,
-          free_text: freeText.trim() || null
-        })
-      });
-      if (!res.ok) throw new Error('request_failed');
-      const data = await res.json();
-      setResult(data);
-    } catch (err) {
-      setErrorMsg('Không thể tổng hợp gợi ý lúc này, vui lòng thử lại.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const applyTrendResponse = (data) => {
-    setSaveState('idle');
-    if (data.status === 'ok') {
-      setTrendResult(data);
-      setShowUploadFallback(false);
-    } else {
-      setTrendResult(null);
-      setTrendError(
-        data.status === 'failed'
-          ? 'Không truy cập được link này.'
-          : 'Chưa phân tích được ảnh lúc này, vui lòng thử lại.'
-      );
-      setShowUploadFallback(true);
-    }
-  };
-
-  const handleTrendUrlSubmit = async (e) => {
-    e.preventDefault();
-    setIsTrendLoading(true);
-    setTrendError('');
-    setTrendResult(null);
+  const handleRemoveLink = () => {
+    setTrendUrl('');
     setShowUploadFallback(false);
-    try {
-      const res = await fetch('/api/heritage/trend-extract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_url: trendUrl.trim() })
-      });
-      if (!res.ok) throw new Error('request_failed');
-      applyTrendResponse(await res.json());
-    } catch (err) {
-      setTrendError('Không thể phân tích lúc này, vui lòng thử lại.');
-      setShowUploadFallback(true);
-    } finally {
-      setIsTrendLoading(false);
-    }
   };
 
   const handleUploadFile = (file) => {
@@ -153,44 +66,59 @@ export default function AdvisorPage({ onRequireAuth }) {
     setUploadPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleTrendUploadSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!uploadFile) return;
-    setIsTrendLoading(true);
-    setTrendError('');
-    setTrendResult(null);
-    try {
-      const formData = new FormData();
-      formData.append('screenshot', uploadFile);
-      const res = await fetch('/api/heritage/trend-extract-upload', {
-        method: 'POST',
-        body: formData
-      });
-      if (!res.ok) throw new Error('request_failed');
-      applyTrendResponse(await res.json());
-    } catch (err) {
-      setTrendError('Không thể phân tích ảnh lúc này, vui lòng thử lại.');
-    } finally {
-      setIsTrendLoading(false);
-    }
-  };
-
-  const resetTrendTab = () => {
-    setTrendUrl('');
-    setTrendResult(null);
-    setTrendError('');
-    setShowUploadFallback(false);
-    setUploadFile(null);
-    setUploadPreviewUrl(null);
+    if (!hasAnyInput) return;
+    setIsLoading(true);
+    setErrorMsg('');
+    setResult(null);
     setSaveState('idle');
+
+    const formData = new FormData();
+    if (occasion) formData.append('occasion', occasion);
+    if (weather) formData.append('weather', weather);
+    if (vibe) formData.append('vibe', vibe);
+    if (freeText.trim()) formData.append('free_text', freeText.trim());
+    if (uploadFile) {
+      formData.append('screenshot', uploadFile);
+    } else if (trendUrl.trim()) {
+      formData.append('source_url', trendUrl.trim());
+    }
+
+    try {
+      const res = await fetch('/api/heritage/advisor', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('request_failed');
+      const data = await res.json();
+
+      if (data.status === 'ok') {
+        setResult(data);
+        setShowUploadFallback(false);
+      } else if (data.status === 'failed' && !uploadFile) {
+        // Link lỗi (riêng tư/không hỗ trợ) -> cho phép tải ảnh chụp màn hình thay thế
+        setErrorMsg(
+          data.reason === 'invalid_file_type' || data.reason === 'file_too_large'
+            ? 'Ảnh không hợp lệ, vui lòng thử ảnh khác.'
+            : 'Không truy cập được link này — hãy thử tải ảnh chụp màn hình thay thế.'
+        );
+        setShowUploadFallback(true);
+      } else if (data.status === 'failed') {
+        setErrorMsg('Ảnh không hợp lệ, vui lòng thử ảnh khác.');
+      } else {
+        setErrorMsg('Chưa phân tích được lúc này, vui lòng thử lại.');
+      }
+    } catch (err) {
+      setErrorMsg('Không thể kết nối đến máy chủ, vui lòng thử lại.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleUseInStudio = (costumeId, sourceImageDataUrl) => {
     navigate(`/studio?costume=${costumeId}`, { state: { sourceImageDataUrl } });
   };
 
-  const handleSaveTrendImage = async () => {
-    if (!trendResult?.image_data_url) return;
+  const handleSaveToGallery = async () => {
+    if (!result?.source_image_data_url) return;
     if (!isAuthenticated) {
       onRequireAuth?.('/advisor');
       return;
@@ -199,14 +127,11 @@ export default function AdvisorPage({ onRequireAuth }) {
     try {
       const res = await fetch('/api/source-images', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          image_data: trendResult.image_data_url,
-          costume_id: trendResult.matched_costume_id,
-          costume_name: trendMatchedCostume?.name || null
+          image_data: result.source_image_data_url,
+          costume_id: result.primary.costume_id,
+          costume_name: result.primary.name
         })
       });
       if (!res.ok) throw new Error('save_failed');
@@ -216,246 +141,246 @@ export default function AdvisorPage({ onRequireAuth }) {
     }
   };
 
-  const trendMatchedCostume = trendResult ? findCostume(trendResult.matched_costume_id) : null;
-  const trendImageForCard = trendResult?.image_data_url || uploadPreviewUrl;
+  const resultsHeaderLabel = result
+    ? `PHIẾU GỢI Ý · ${[...filterSummaryParts, extraInspirationCount ? `+${extraInspirationCount} CẢM HỨNG` : null].filter(Boolean).join(' · ').toUpperCase()}`
+    : 'PHIẾU GỢI Ý · CHƯA CÓ';
+  const resultsCountLabel = result ? `${1 + result.secondary.length} bộ` : 'Điền ít nhất một mục';
 
   return (
     <div className="advisor-page-container">
-      {/* HERO — cùng ngôn ngữ thị giác với trang chủ */}
-      <section className="landing-hero-section advisor-hero-section">
-        <div className="landing-hero-content">
+      <div className="advisor-studio-layout">
+        {/* CỘT TRÁI: FORM NHẬP */}
+        <aside className="advisor-sidebar">
           <div className="landing-kicker-badge">
             <span>GIÁM TUYỂN THỜI TRANG SỐ</span>
           </div>
-          <h1 className="landing-main-title advisor-hero-title">Gợi Ý Phối Đồ</h1>
-          <p className="landing-tagline">
-            Mô tả bối cảnh của bạn, hoặc dán 1 link trend bạn vừa thấy — Giám tuyển sẽ đề
-            xuất trang phục Việt phục phù hợp để bạn phối ngay trong Studio.
+          <h1 className="advisor-sidebar-title">Gợi Ý Phối Đồ</h1>
+          <p className="advisor-sidebar-subtitle">
+            Cho biết dịp mặc, thêm một cảm hứng nếu có — nhận 1-3 bộ cổ phục đã chọn sẵn.
           </p>
-        </div>
-      </section>
 
-      {/* HƯỚNG DẪN 3 BƯỚC */}
-      <section className="landing-pillars-section advisor-pillars-section">
-        <div className="pillars-container">
-          {HOW_IT_WORKS.map((step) => (
-            <div key={step.number} className="pillar-card">
-              <div className="pillar-number">{step.number}</div>
-              <h3 className="pillar-title">{step.title}</h3>
-              <p className="pillar-desc">{step.desc}</p>
+          <div className="advisor-sidebar-divider" />
+
+          <form onSubmit={handleSubmit}>
+            <div className="advisor-section-header">
+              <span className="advisor-section-roman">I.</span>
+              <span className="advisor-section-title">Dịp</span>
+              <span className="advisor-section-hint">Bạn mặc khi nào</span>
             </div>
-          ))}
-        </div>
-      </section>
 
-      <div className="advisor-workspace">
-        <div className="advisor-tab-bar">
-          <button
-            type="button"
-            className={`advisor-chip ${activeTab === 'context' ? 'active' : ''}`}
-            onClick={() => setActiveTab('context')}
-          >
-            Theo Bối Cảnh
-          </button>
-          <button
-            type="button"
-            className={`advisor-chip ${activeTab === 'trend' ? 'active' : ''}`}
-            onClick={() => setActiveTab('trend')}
-          >
-            Theo Trend
-          </button>
-        </div>
+            <ChipGroup label="SỰ KIỆN" options={OCCASION_OPTIONS} value={occasion} onChange={setOccasion} />
+            <ChipGroup label="THỜI TIẾT" options={WEATHER_OPTIONS} value={weather} onChange={setWeather} />
+            <ChipGroup label="PHONG CÁCH" options={VIBE_OPTIONS} value={vibe} onChange={setVibe} />
 
-        <div className="advisor-page-body">
-          {activeTab === 'context' && (
-            <>
-              {!result && (
-                <form onSubmit={handleSubmit} className="advisor-form">
-                  <ChipGroup label="Sự kiện" options={OCCASION_OPTIONS} value={occasion} onChange={setOccasion} />
-                  <ChipGroup label="Thời tiết" options={WEATHER_OPTIONS} value={weather} onChange={setWeather} />
-                  <ChipGroup label="Phong cách" options={VIBE_OPTIONS} value={vibe} onChange={setVibe} />
+            <textarea
+              className="advisor-textarea"
+              rows={2}
+              value={freeText}
+              onChange={(e) => setFreeText(e.target.value)}
+              placeholder="Đi xem triển lãm ở Bảo tàng Mỹ thuật cuối tuần…"
+            />
 
-                  <div className="advisor-freetext-group">
-                    <span className="advisor-group-label">Mô tả thêm</span>
-                    <textarea
-                      className="advisor-textarea"
-                      rows={2}
-                      value={freeText}
-                      onChange={(e) => setFreeText(e.target.value)}
-                      placeholder="Ví dụ: đi lễ hội Trung Thu phố cổ Hội An buổi tối"
-                    />
-                  </div>
+            <div className="advisor-sidebar-divider" />
 
-                  {errorMsg && <div className="advisor-error-text">{errorMsg}</div>}
+            <div className="advisor-section-header">
+              <span className="advisor-section-roman">II.</span>
+              <span className="advisor-section-title">Cảm Hứng</span>
+              <span className="advisor-section-hint">Không bắt buộc</span>
+            </div>
 
-                  <button type="submit" className="btn-editorial-primary advisor-submit-btn" disabled={isLoading}>
-                    {isLoading ? 'Đang tổng hợp' : 'Xin gợi ý'}
-                  </button>
-                </form>
-              )}
-
-              {result && (
-                <div className="advisor-results">
-                  {result.curator_intro && <p className="advisor-intro-text">{result.curator_intro}</p>}
-
-                  <div className="advisor-card-list">
-                    {result.recommendations.map((rec) => {
-                      const costume = findCostume(rec.costume_id);
-                      if (!costume) return null;
-                      return (
-                        <div key={rec.costume_id} className="advisor-recommend-card">
-                          <div className="advisor-card-img">
-                            <img src={costume.cover_image} alt={costume.name} />
-                          </div>
-                          <div className="advisor-card-body">
-                            <span className="advisor-card-era">{costume.era_origin}</span>
-                            <h4 className="advisor-card-title">{costume.name}</h4>
-                            {rec.reason && <p className="advisor-card-reason">{rec.reason}</p>}
-                            <button
-                              type="button"
-                              className="advisor-card-action"
-                              onClick={() => navigate(`/studio?costume=${costume.id}`)}
-                            >
-                              Phối đồ ngay
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <button type="button" className="btn-editorial-secondary advisor-retry-btn" onClick={() => setResult(null)}>
-                    Thử bối cảnh khác
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          {activeTab === 'trend' && (
-            <>
-              {!trendResult && !showUploadFallback && (
-                <form onSubmit={handleTrendUrlSubmit} className="advisor-form">
-                  <div className="advisor-freetext-group">
-                    <span className="advisor-group-label">Link TikTok hoặc Facebook</span>
-                    <input
-                      type="text"
-                      className="advisor-textarea"
-                      value={trendUrl}
-                      onChange={(e) => setTrendUrl(e.target.value)}
-                      placeholder="Dán link video/bài viết bạn thấy đang trend"
-                    />
-                  </div>
-
-                  {trendError && <div className="advisor-error-text">{trendError}</div>}
-
-                  <button
-                    type="submit"
-                    className="btn-editorial-primary advisor-submit-btn"
-                    disabled={isTrendLoading || !trendUrl.trim()}
-                  >
-                    {isTrendLoading ? 'Đang phân tích' : 'Phân Tích'}
-                  </button>
-                </form>
-              )}
-
-              {showUploadFallback && !trendResult && (
-                <form onSubmit={handleTrendUploadSubmit} className="advisor-form">
-                  {trendError && <div className="advisor-error-text">{trendError}</div>}
-
-                  <div
-                    className="advisor-trend-upload-zone"
-                    onClick={() => document.getElementById('trend-upload-input')?.click()}
-                  >
-                    {uploadPreviewUrl ? (
-                      <img src={uploadPreviewUrl} alt="Ảnh chụp màn hình đã chọn" />
-                    ) : (
-                      <span>Nhấp để tải ảnh chụp màn hình thay thế</span>
-                    )}
-                  </div>
+            {!showUploadFallback && (
+              <div className="advisor-freetext-group">
+                <span className="advisor-group-label">Link TikTok / Facebook</span>
+                <div className="advisor-link-input-row">
                   <input
-                    id="trend-upload-input"
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={(e) => handleUploadFile(e.target.files?.[0])}
+                    type="text"
+                    className="advisor-textarea advisor-link-input"
+                    value={trendUrl}
+                    onChange={(e) => setTrendUrl(e.target.value)}
+                    placeholder="Dán link video/bài viết bạn thấy đang trend"
                   />
+                  {trendUrl && (
+                    <button type="button" className="advisor-link-remove-btn" onClick={handleRemoveLink}>
+                      Gỡ
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="advisor-inline-link-btn"
+                  onClick={() => setShowUploadFallback(true)}
+                >
+                  Link riêng tư? Tải ảnh chụp màn hình
+                </button>
+              </div>
+            )}
 
-                  <div className="advisor-form-actions-row">
-                    <button
-                      type="submit"
-                      className="btn-editorial-primary advisor-submit-btn"
-                      disabled={isTrendLoading || !uploadFile}
-                    >
-                      {isTrendLoading ? 'Đang phân tích' : 'Phân Tích Ảnh'}
-                    </button>
-                    <button type="button" className="advisor-card-action" onClick={resetTrendTab}>
-                      Dán link khác
-                    </button>
+            {showUploadFallback && (
+              <div className="advisor-freetext-group">
+                <div
+                  className="advisor-trend-upload-zone"
+                  onClick={() => document.getElementById('advisor-upload-input')?.click()}
+                >
+                  {uploadPreviewUrl ? (
+                    <img src={uploadPreviewUrl} alt="Ảnh chụp màn hình đã chọn" />
+                  ) : (
+                    <span>Kéo ảnh vào đây · JPG, PNG — tối đa 10MB</span>
+                  )}
+                </div>
+                <input
+                  id="advisor-upload-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => handleUploadFile(e.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  className="advisor-inline-link-btn"
+                  onClick={() => {
+                    setShowUploadFallback(false);
+                    setUploadFile(null);
+                    setUploadPreviewUrl(null);
+                  }}
+                >
+                  Dùng link thay thế
+                </button>
+              </div>
+            )}
+
+            {errorMsg && <div className="advisor-error-text">{errorMsg}</div>}
+
+            <button
+              type="submit"
+              className="btn-editorial-primary advisor-submit-btn-full"
+              disabled={!hasAnyInput || isLoading}
+            >
+              {isLoading ? 'Đang tổng hợp' : 'Nhận gợi ý'}
+            </button>
+          </form>
+
+          <div className="advisor-steps-indicator">
+            <span>01 Chọn</span>
+            <span>—</span>
+            <span>02 Phân tích</span>
+            <span>—</span>
+            <span>03 Phối đồ</span>
+          </div>
+        </aside>
+
+        {/* CỘT PHẢI: KẾT QUẢ */}
+        <section className="advisor-results-panel">
+          <div className="advisor-results-header">
+            <span>{resultsHeaderLabel}</span>
+            <span className="advisor-results-count">{resultsCountLabel}</span>
+          </div>
+          <div className="advisor-results-divider" />
+
+          <p className="advisor-big-quote">“{result ? result.curator_quote : PLACEHOLDER_QUOTE}”</p>
+
+          {result && (
+            <div className="advisor-primary-card">
+              <div className="advisor-primary-card-header">
+                <span>
+                  {result.source_image_data_url
+                    ? 'LỰA CHỌN HÀNG ĐẦU · TỪ CẢM HỨNG CỦA BẠN'
+                    : 'LỰA CHỌN HÀNG ĐẦU · TỪ BỐI CẢNH'}
+                </span>
+                <span>{result.primary.era_origin}</span>
+              </div>
+
+              <div
+                className="advisor-primary-media"
+                style={{ gridTemplateColumns: result.source_image_data_url ? '1fr 1.2fr 1fr' : '1fr' }}
+              >
+                {result.source_image_data_url && (
+                  <div className="advisor-media-box">
+                    <img src={result.source_image_data_url} alt="Ảnh cảm hứng" />
+                    <span className="advisor-media-caption">Ảnh từ link</span>
                   </div>
-                </form>
-              )}
+                )}
 
-              {trendResult && trendMatchedCostume && (
-                <div className="advisor-results">
-                  <div className="advisor-card-list">
-                    <div className="advisor-recommend-card">
-                      <div className="advisor-card-img">
-                        <img src={trendImageForCard} alt={trendMatchedCostume.name} />
-                      </div>
-                      <div className="advisor-card-body">
-                        <span className="advisor-card-era">{trendMatchedCostume.era_origin}</span>
-                        <h4 className="advisor-card-title">{trendMatchedCostume.name}</h4>
-                        {trendResult.adaptation_reason && (
-                          <p className="advisor-card-reason">{trendResult.adaptation_reason}</p>
-                        )}
-                        <div className="advisor-form-actions-row">
-                          <button
-                            type="button"
-                            className="advisor-card-action"
-                            onClick={() => handleUseInStudio(trendMatchedCostume.id, trendResult.image_data_url)}
-                          >
-                            Phối đồ ngay
-                          </button>
-                          <button
-                            type="button"
-                            className="advisor-card-action"
-                            onClick={handleSaveTrendImage}
-                            disabled={saveState === 'saving' || saveState === 'saved'}
-                          >
-                            {saveState === 'saved'
-                              ? 'Đã lưu vào gallery'
-                              : saveState === 'saving'
-                                ? 'Đang lưu'
-                                : 'Lưu vào gallery'}
-                          </button>
+                {result.primary.mapping.length > 0 && (
+                  <div className="advisor-mapping-table">
+                    {result.primary.mapping.map((row) => (
+                      <div key={row.label} className="advisor-mapping-row">
+                        <span className="advisor-mapping-label">{row.label}</span>
+                        <div className="advisor-mapping-values">
+                          <span>{row.source_value}</span>
+                          <span className="advisor-mapping-arrow">→</span>
+                          <span>{row.target_value}</span>
                         </div>
-                        {saveState === 'error' && (
-                          <div className="advisor-error-text">Không lưu được lúc này, vui lòng thử lại.</div>
-                        )}
                       </div>
-                    </div>
+                    ))}
                   </div>
+                )}
 
-                  <button type="button" className="btn-editorial-secondary advisor-retry-btn" onClick={resetTrendTab}>
-                    Thử link khác
+                <div className="advisor-media-box">
+                  <img src={result.primary.cover_image} alt={result.primary.name} />
+                  <span className="advisor-media-caption">Kho di sản</span>
+                </div>
+              </div>
+
+              <div className="advisor-primary-footer">
+                <h3 className="advisor-primary-title">{result.primary.name}</h3>
+                <div className="advisor-primary-actions">
+                  {result.source_image_data_url && (
+                    <button
+                      type="button"
+                      className="btn-editorial-secondary"
+                      onClick={handleSaveToGallery}
+                      disabled={saveState === 'saving' || saveState === 'saved'}
+                    >
+                      {saveState === 'saved' ? 'Đã lưu' : saveState === 'saving' ? 'Đang lưu' : 'Lưu vào gallery'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="btn-editorial-primary"
+                    onClick={() => handleUseInStudio(result.primary.costume_id, result.source_image_data_url)}
+                  >
+                    Phối đồ ngay
                   </button>
                 </div>
-              )}
-
-              {trendResult && !trendMatchedCostume && (
-                <div className="advisor-results">
-                  <div className="advisor-error-text">
-                    Đã phân tích xong nhưng chưa tải được thông tin trang phục tương ứng.
-                  </div>
-                  <button type="button" className="btn-editorial-secondary advisor-retry-btn" onClick={resetTrendTab}>
-                    Thử link khác
-                  </button>
-                </div>
-              )}
-            </>
+              </div>
+            </div>
           )}
-        </div>
+
+          {result && result.secondary.length > 0 && (
+            <div className="advisor-secondary-grid">
+              {result.secondary.map((rec, idx) => (
+                <div key={rec.costume_id} className="advisor-secondary-card">
+                  <div className="advisor-secondary-img">
+                    <img src={rec.cover_image} alt={rec.name} />
+                  </div>
+                  <span className="advisor-secondary-tag">{`0${idx + 2} · ${rec.tag}`}</span>
+                  <h4 className="advisor-secondary-title">{rec.name}</h4>
+                  <p className="advisor-secondary-reason">{rec.reason}</p>
+                  <button
+                    type="button"
+                    className="advisor-card-action"
+                    onClick={() => handleUseInStudio(rec.costume_id, null)}
+                  >
+                    Phối đồ ngay →
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!result && (
+            <div className="advisor-empty-explainer-grid">
+              <div className="advisor-empty-explainer-card">
+                <h4>I. Dịp</h4>
+                <p>Chọn sự kiện, thời tiết, phong cách — giám tuyển lọc kho di sản theo đúng hoàn cảnh.</p>
+              </div>
+              <div className="advisor-empty-explainer-card">
+                <h4>II. Cảm Hứng</h4>
+                <p>Dán link TikTok hoặc Facebook — màu sắc, phom dáng, vibe được ánh xạ sang Việt phục.</p>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
